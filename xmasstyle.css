@@ -21,4 +21,5 @@ div {
     background-color: white;
     z-index: 5000;
     width: 500px;
+    align-content: center;
 }
