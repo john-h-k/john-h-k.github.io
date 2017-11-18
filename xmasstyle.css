@@ -19,6 +19,8 @@ img {
     margin: 10px;
 }
 
+/*
+
 div {
     background-color: white;
     z-index: 5000;
@@ -28,7 +30,7 @@ div {
     margin-right: 150px;
     margin-bottom: 0px;
     margin-top: 0px;
-    min-width: 170px;;
+    min-width: 170px;
 }
 
 div.top {
@@ -53,6 +55,8 @@ div.bottom {
     margin-top: 0px;
 }
 
+*/
+
 hr {
     margin: 0px;
     color: black;
@@ -60,4 +64,16 @@ hr {
 
 a {
     color: rgb(56, 56, 228);
+}
+
+#wrapper {
+    background-color: white;
+    z-index: 5000;
+    align-content: center;
+    display: inline-block;
+    margin-left: 150px;
+    margin-right: 150px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    min-width: 170px;
 }
