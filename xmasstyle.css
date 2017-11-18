@@ -5,6 +5,7 @@
 
 body {
     background-image: url("https://i.pinimg.com/736x/98/8e/a2/988ea21ebc691a1bdbfa1a140a336330--christmas-design-green-christmas.jpg");
+    z-index: 1000;
 }
 
 img {
@@ -18,4 +19,5 @@ img {
 
 div {
     background-color: white;
+    z-index: 5000;
 }
