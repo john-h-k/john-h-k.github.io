@@ -20,4 +20,5 @@ img {
 div {
     background-color: white;
     z-index: 5000;
+    width: 50%;
 }
