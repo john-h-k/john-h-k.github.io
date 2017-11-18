@@ -28,6 +28,7 @@ div {
     margin-right: 150px;
     margin-bottom: 0px;
     margin-top: 0px;
+    min-width: 170px;;
 }
 
 div.top {
@@ -55,4 +56,8 @@ div.bottom {
 hr {
     margin: 0px;
     color: black;
+}
+
+a {
+    color: rgb(56, 56, 228);
 }
