@@ -11,8 +11,8 @@ body {
 }
 
 img {
-    height: 35%;
-    width: 35%;
+    height: 70%;
+    width: 70%;
 }
 
 .mainPic {
@@ -24,6 +24,35 @@ div {
     z-index: 5000;
     align-content: center;
     display: inline-block;
-    margin: 0;
-    padding: 300%;
+    margin-left: 150px;
+    margin-right: 150px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+div.top {
+    background-color: white;
+    z-index: 5000;
+    align-content: center;
+    display: inline-block;
+    margin-left: 150px;
+    margin-right: 150px;
+    margin-bottom: 0px;
+    margin-top: 50px;
+}
+
+div.bottom {
+    background-color: white;
+    z-index: 5000;
+    align-content: center;
+    display: inline-block;
+    margin-left: 150px;
+    margin-right: 150px;
+    margin-bottom: 50px;
+    margin-top: 0px;
+}
+
+hr {
+    margin: 0px;
+    color: black;
 }
