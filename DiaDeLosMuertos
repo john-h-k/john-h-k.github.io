@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <html>
+<head>
+<title>Dia De Los Muertos</title>
+</head>
+<body>
 <!-- Homework; If you're here its probably by mistake -->
 <h1 id="diadelosmuertosmxico">Dia De Los Muertos - México</h1>
 
@@ -19,4 +23,5 @@
 <h2 id="cundosecelebra">¿Cuándo se celebra?</h2>
 
 <p>DD es en el segundo de Noviembre en México, pero en mucho de América del Sur se celebra de el trigésimo primero de Octobre a el segundo de Noviembre </p>
+</body>
 </html>
