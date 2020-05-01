@@ -18,7 +18,7 @@ An example of SISD is a normal x64 addition:
 add eax, ecx
 ```
 
-(For the ~~lucky~~ uninitiated few, `eax` and `ecx` are x64 32 bit registers. Naming of it isn't important here. And the first register functions as both a destination and a source, so it is equivalent to roughly `eax = eax + ecx`).
+(For the ~~lucky~~ uninitiated few, `eax` and `ecx` are x86 32 bit registers. Naming of it isn't important here. And the first register functions as both a destination and a source, so it is equivalent to roughly `eax = eax + ecx`).
 
 This is a single instruction, and it operates on single data. Yes, it has 2 operands, but they are both part of the operation, so it is a single data stream. An example of SIMD is
 
