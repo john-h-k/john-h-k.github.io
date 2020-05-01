@@ -42,7 +42,7 @@ Some compilers let you specify the old `destAndSrc0, src1` syntax, but it is wor
 
 ## Mixing VEX and not VEX
 
-(Note: We ignore `XSAVE` and `XRSTOR` for simplicity here - but cover them at the bottom, if you need that)
+(Note: We ignore `xsave` and `xrstor` for simplicity here - but cover them at the bottom, if you need that)
 
 Now, VEX also does something very special in relation to `ymm` registers. When you perform an 128 bit AVX instruction or VEX encoded SSE instruction - one which begins with the legendary `v` but operates on `xmm` registers - it zeroes the upper 128 bits of the `ymm` register, for performance reasons. This is nice, and known about, and just how it works. No issue here. But what about non-VEX encoded SSE instructions? They have no idea of the existence of the upper 128 bits of the XMM registers they work on. So the CPU has to "save" the upper 128 bits when executing these instructions - it enters a "preserved upper state" and when coming back to 256 bit AVX instructions which write to them (using them as a dest) - note, you can execute 128 bit VEX encoded instructions just fine with a preserved upper state - so the CPU must restore these bits. This is not a trivially cheap operation - Intel give its timing as "several tens of clock cycles for each operation". This isn't great, and means you shouldn't mix them wherever possible. If you have
 
