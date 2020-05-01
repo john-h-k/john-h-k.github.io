@@ -149,3 +149,4 @@ Post skylake, restoring a saved dirty state involves a short penalty, even when 
 ### Sources:
 
 [Intel Optimization Manual](https://software.intel.com/sites/default/files/managed/9e/bc/64-ia-32-architectures-optimization-manual.pdf)
+[Felix Cloutier's x86 instruction reference page](https://www.felixcloutier.com/x86/)
