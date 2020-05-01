@@ -122,7 +122,7 @@ Note: This probably doesn't actually work on most systems - the low bits of `ymm
 
 So, now our call looks like
 
-```x86asm
+```cs
 BigAvxMethod(); // Only AVX instrs
 Asm.SaveRegisters();
 Asm.VZeroUpper();
