@@ -2,11 +2,11 @@
 
 You might have heard of AVX to SSE transition penalties, or VEX encoding, or seen some assembly with a lot of "v"s in front of instructions and been mildly confused by it. Hopefully, this post can help clear these concepts up - what they are, why they matter to you (or don't, hopefully), and why they are significant.
 
-My twitter: https://twitter.com/johnkdev
+My twitter: [https://twitter.com/johnkdev](https://twitter.com/johnkdev)
 
-My github: https://github.com/john-h-k
+My github: [https://github.com/john-h-k](https://github.com/john-h-k)
 
-Contact me at johnkellyoxford@gmail.com
+Contact me at [johnkellyoxford@gmail.com](johnkellyoxford@gmail.com)
 
 ## A brief primer on SSE and AVX
 
