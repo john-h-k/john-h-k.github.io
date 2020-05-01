@@ -18,7 +18,7 @@ An example of SISD is a normal x64 addition:
 add eax, ecx
 ```
 
-(For the ~~lucky~~ uninitiated few, `eax` and `ecx` are x64 32 bit registers. Naming of it isn't important here. And the first register functions as both a destination and a source, so it is equivalent to roughly `rax = rax + rcx`).
+(For the ~~lucky~~ uninitiated few, `eax` and `ecx` are x64 32 bit registers. Naming of it isn't important here. And the first register functions as both a destination and a source, so it is equivalent to roughly `eax = eax + ecx`).
 
 This is a single instruction, and it operates on single data. Yes, it has 2 operands, but they are both part of the operation, so it is a single data stream. An example of SIMD is
 
@@ -64,7 +64,7 @@ However, there are ways to avoid this transitions - by only executing old SSE in
 
 Here is a descriptive image from intel showing the above - black lines represent normal operations, whereas red lines are delayed operations. Note that there are only red lines when transitioning - after executing one dirty instruction, and entering the preserved non upper state, all following ones are not delayed.
 
-![Intel_PreSkylake_Transitions](/Assets/Intel_PreSkylake_Transitions_NoXSave.png)
+![Intel_PreSkylake_Transitions](Assets/Intel_PreSkylake_Transitions_NoXSave.png)
 
 But - this all changed in Skylake and more recent microarchitectures. There is no longer such thing as a preserved upper state - only a clean upper state (from a `vzeroupper` or `vzeroall`, and a dirty upper state (after any 256 bit AVX instruction has been operated)). In a clean upper state, you can operate non VEX 128 bit or VEX 128 bit instructions with no penalty. In dirty upper state, you can operate any VEX 128 bit or 256 bit instruction with no penalty.
 
@@ -74,7 +74,7 @@ However, the penalty is less significant - the per instruction penalty is a new 
 
 Here is the graph for Skylake+:
 
-![Intel_PostSkylake_Transitions](/Assets/Intel_PostSkylake_Transitions_NoXSave.png)
+![Intel_PostSkylake_Transitions](Assets/Intel_PostSkylake_Transitions_NoXSave.png)
 
 Let's look back at the code snippet from earlier:
 
@@ -139,8 +139,8 @@ This section assumes you know what `xsave` and `xrstor` are. If not, this info i
 
 Pre skylake, if you had a clean upper state, saving state, followed by restoring state, results in a clean upper state. Saving with a dirty upper state, and then restoring, results in entering a preserved upper state, and entering this state invokes a one time short penalty during restore, which will become dirty if a VEX encoded instruction is executed, or cleaned by a `vzeroupper/vzeroall`. Restoring state with AVX state initialized (zeroed) enters a clean state, although if it is from a dirty image or preserved upper state, it invokes a penalty.
 
-![Intel_PreSkylake_Transitions](/Assets/Intel_PreSkylake_Transitions.png)
+![Intel_PreSkylake_Transitions](Assets/Intel_PreSkylake_Transitions.png)
 
 Post skylake, restoring a saved dirty state involves a short penalty, even when no non VEX instructions are executed, and returns to a dirty upper state. Restoring a clean image or restoring with AVX initialized has no penalty and returns to a clean state.
 
-![Intel_PostSkylake_Transitions](/Assets/Intel_PostSkylake_Transitions.png)
+![Intel_PostSkylake_Transitions](Assets/Intel_PostSkylake_Transitions.png)
