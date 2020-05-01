@@ -144,3 +144,8 @@ Pre skylake, if you had a clean upper state, saving state, followed by restoring
 Post skylake, restoring a saved dirty state involves a short penalty, even when no non VEX instructions are executed, and returns to a dirty upper state. Restoring a clean image or restoring with AVX initialized has no penalty and returns to a clean state.
 
 ![Intel_PostSkylake_Transitions](Assets/Intel_PostSkylake_Transitions.png)
+
+
+### Sources:
+
+[Intel Optimization Manual](https://software.intel.com/sites/default/files/managed/9e/bc/64-ia-32-architectures-optimization-manual.pdf)
