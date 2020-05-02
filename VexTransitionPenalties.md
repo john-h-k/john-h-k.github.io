@@ -62,7 +62,7 @@ However, there are ways to avoid this transitions - by only executing old SSE in
 
 `vzeroupper` has 0 latency (is eliminated at instruction renaming), and so has no performance impact other than code size. However, when executed from a preserved upper state, it has a penalty approximately as long as an `xsave`.
 
-Here is a descriptive image from intel showing the above - black lines represent normal operations, whereas red lines are delayed operations. Note that there are only red lines when transitioning - after executing one dirty instruction, and entering the preserved non upper state, all following ones are not delayed.
+Here is a descriptive image from intel showing the above - black lines represent normal operations, whereas red lines are operations which have penalties. Note that there are only red lines when transitioning - after executing one dirty instruction, and entering the preserved non upper state, all following ones are at regular speed.
 
 ![Intel_PreSkylake_Transitions](Assets/Intel_PreSkylake_Transitions_NoXSave.png)
 
@@ -135,7 +135,7 @@ In reality, your compiler will handle appropriate zeroing and preserving of regi
 
 ## XSAVE and XRSTOR and their relation to preserving upper vector states
 
-This section assumes you know what `xsave` and `xrstor` are. If not, this info is basically useless to you.
+This section assumes you know what `xsave` and `xrstor` are. If not, see Volume 1 Chapter 13 of the (Intel Developer Manuals](https://software.intel.com/en-us/articles/intel-sdm).
 
 Pre skylake, if you had a clean upper state, saving state, followed by restoring state, results in a clean upper state. Saving with a dirty upper state, and then restoring, results in entering a preserved upper state, and entering this state invokes a one time short penalty during restore, which will become dirty if a VEX encoded instruction is executed, or cleaned by a `vzeroupper/vzeroall`. Restoring state with AVX state initialized (zeroed) enters a clean state, although if it is from a dirty image or preserved upper state, it invokes a penalty.
 
@@ -145,8 +145,7 @@ Post skylake, restoring a saved dirty state involves a short penalty, even when 
 
 ![Intel_PostSkylake_Transitions](Assets/Intel_PostSkylake_Transitions.png)
 
-
-### Sources:
+### Further reading
 
 [Intel Optimization Manual](https://software.intel.com/sites/default/files/managed/9e/bc/64-ia-32-architectures-optimization-manual.pdf)
 
