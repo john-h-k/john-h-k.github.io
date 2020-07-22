@@ -2,7 +2,7 @@
 
 This page lists open-source .NET projects which provide bindings to native libraries. Feel free to [contribute to this page](https://github.com/john-h-k/john-h-k.github.io/blob/master/bindings.md)
 
-See [here][1] search by a native DLL's name
+Go to the bottom of the page to search by a native DLL's name
 
 * [dotnet/PInvoke](https://github.com/dotnet/pinvoke) - higher level bindings for a large proportion of Win32 libraries. Great for general use, althought not always as performant as alternatives - targets .NET standard 2.0
 
@@ -22,7 +22,7 @@ See [here][1] search by a native DLL's name
 
 * [PIX.NET](https://github.com/john-h-k/PIX.NET) - Bindings for PIX, the windows graphics/ML debugging tool, that closely imitate the native `pix3.h` bindings - targets - requires .NET 5
 
-[1]<details>
+<details>
     <summary>Search by a native DLL name</summary>
     TODO
 </details>
