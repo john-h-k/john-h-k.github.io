@@ -15,11 +15,11 @@
 
 ## COM vs Nano-COM
 
-* COM stands for Common Object Model, and is a programming interface standard made by microsoft. COM is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like `CoCreateInstance` and COM servers) here as they are irrelevant to DirectX.
+* COM stands for Common Object Model, and is a programming interface standard made by microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like `CoCreateInstance` and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.
 
-DirectX uses a interface model referred to as "Nano-COM", which uses the ABI (application-binary interface - horribly oversimplified, but basically how different programs interact on a binary level, e.g parameter passing, errors, etc), as well as the error-code model of COM.
+DirectX uses a interface model referred to casually as "Nano-COM", which utilises the ABI (application-binary interface - a topic for another article, but basically how different programs interact on a binary level, e.g parameter passing, errors, etc), as well as the error-code model of COM.
 
-A couple of COM data types to know:
+As anyone who has worked with COM or Win32 before will know, windows loves its `typedef`s. Not too many are essential to know, but a few are frequently used in COM code:
 
 * `REFGUID` - GUID pointer in C/C#, GUID reference in C++
 * `UINT/ULONG` - 32 bit unsigned int
@@ -28,9 +28,7 @@ A couple of COM data types to know:
 
 ## IUnknown
 
-`IUnknown` is the base interface of all COM types. Everything derives from it, and DirectX interfaces are no exception.
-
-`IUnknown` has 3 methods, which allow reference counting and query interface, and are the core methods required to manage arbitrary COM objects. All these methods must be thread safe
+`IUnknown` is the base interface of all COM types. Everything derives from it, and DirectX interfaces are no exception. This interface has 3 methods, which allow reference counting and inheritance/aggregation, and are the core methods required to manage arbitrary COM objects. (All these methods must be thread safe)
 
 ```cpp
 UINT AddRef();
@@ -38,13 +36,13 @@ UINT Release();
 HRESULT QueryInterface(REFGUID pIID, void** ppvObject);
 ```
 
-All these methods will soon be explained, just understand that any COM interface is implicitly convertable to an `IUnknown*`. Similar to Java's `Java.lang.Object` type or .NET's `System.Object` type.
+All these methods will soon be explained - for now, just understand that any COM interface is implicitly convertable to an `IUnknown*`. Similar to Java's `Java.lang.Object` type or .NET's `System.Object` type, it acts as the base of all types in the ecosystem.
 
-You always work through COM objects with pointers. Never ever derefence them (if your language allows it, looking at you C). You will get horrible object slicing and inevitable mem corruption.
+> Note: You always work through COM objects with pointers. Never ever derefence them (if your language allows it). You will get horrible object slicing and inevitable mem corruption. :(
 
 ## Reference Counting
 
-COM objects are memory managed by reference counting. `AddRef` and `Release` are the 2 key methods here. `AddRef`, as the name suggests, increments the COM object's internal reference counter, and then it returns the *new* reference count. `Release` decrements the COM object's internal counter, and then it also returns the new reference count. Note that the documentation for `IUnknown` says these return values should only be relied upon for testing purposes, and not for general code (it isn't your business how many references a COM object has!). If the call to `Release` results in the counter decrementing to 0, then the COM object's lifetime ends, and it is destroyed. Any further calls on the object are undefined behaviour (you can't "revive" it with an `AddRef` call). It is worth noting that the D3D12 debug layer frequently will warn you of double-releasing an object, but often will simply crash if you invoke other methods on a destroyed object.
+COM objects are memory-managed by reference counting, where the COM object stores how many references to it exist to control its lifetime, and then destroys itself when there are non left (never use `delete` on a COM interface!). `AddRef` and `Release` are the 2 methods used for manipulating reference counts. `AddRef`, as the name suggests, increments the object's internal reference counter, and then it returns the *new* reference count. `Release` decrements the COM object's internal counter, and then it also returns the new reference count (note that the documentation for `IUnknown` says these return values should only be relied upon for testing purposes, and not for general code (it isn't your business how many references a COM object has!)). If the call to `Release` results in the counter decrementing to 0, then the COM object's lifetime ends, and it is destroyed. Any further calls on the object are undefined behaviour (you can't "revive" it with an `AddRef` call). It is worth noting that the D3D12 debug layer frequently will warn you of double-releasing an object, but often will simply crash if you invoke other methods on a destroyed object.
 
 ## PrivateDate and object names
 
@@ -117,9 +115,9 @@ std::wstring RetrieveName(ID3D12Object* pObj)
 * IID = Interface IDentifier
 * CLSID = CLass Identifier
 
-A GUID isn't a COM concept, and you probably know of them already. They are just a 128 bit value to identify something. Because 2^128 is big (really big. really really big. really really really big), you can generally assume any generated GUID is unique. Visual Studio has an inbuilt generator for one, or use [guidgenerator](https://guidgenerator.com).
+A GUID isn't a COM concept, and just means Globally-Unique ID. They are just a 128 bit value to identify something. Because 2^128 is big (really big. really really big. really really really big), you can generally assume any generated GUID is unique. Visual Studio has an inbuilt generator for one, or use [guidgenerator](https://guidgenerator.com).
 
-An IID is used to identify an interface programmatically, a sort of crude RTTI system. For example, the IID of `IUnknown` is `00000000-0000-0000-C000-000000000046`, and the IID of `ID3D12Device` is `189819F1-1DB6-4B57-BE54-1821339B85F7`.
+An IID is used to identify an interface programmatically, as a sort of crude RTTI system. For example, the IID of `IUnknown` is `00000000-0000-0000-C000-000000000046`, and the IID of `ID3D12Device` is `189819F1-1DB6-4B57-BE54-1821339B85F7`.
 
 To retrieve an IID of an interface, in Visual C++ or C# (with `TerraFX.Interop.Windows`) you can use the `__uuidof` of operator to retrieve the interface.
 
