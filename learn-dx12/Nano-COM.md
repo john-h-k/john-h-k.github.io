@@ -173,7 +173,7 @@ This `IID` + `ppvObject` pattern pops up a lot, so there is a macro to help you.
 #define IID_PPV_ARGS(pObj) __uuidof(*(pObj)), (void **)(pObj)
 ```
 
-You it as such
+You use it as such:
 
 ```cpp
 IComInterfaceBlah* res = nullptr;
@@ -182,11 +182,11 @@ SomeIidPpvMethod(..., IID_PPV_ARGS(&res));
 
 You can find this macro in `combaseapi.h` as well as in the DirectX-Headers and DirectXTK12 repos on github.
 
-You are probably (hopefully?) aware of inheritance (sorry Rust devs). COM has both inheritance and aggregation. `QueryInterface` encompasses both.
-Inheritance here meaning identity conversions (so your pointer to an `ID3D12Device7` is actually also an `ID3D12Device4`), whereas aggregation can only be accessed through `QueryInterface`
+COM has both inheritance and aggregation, and uses `QueryInterface` to encompass both.
+Inheritance here meaning identity conversions (so your pointer to an `ID3D12Device7` is actually also an `ID3D12Device4`), whereas aggregation simply means the interface may contain the desired interface as a field, meaning can only be accessed through `QueryInterface`
 (your `ID3D12Devic4` might support `ID3D12Device7`, but it itself is not necessarily an `ID3D12Device7`).
 
-`iid` is the IID of the interface you want. `ppvObject` is a pointer to the interface-pointer it will be outputted to.
+The `iid` parameter is the IID of the interface you want. `ppvObject` is a pointer to the interface-pointer it will be outputted to.
 Note: You can *never* safely downcast a COM pointer based on a `QueryInterface` result. Your `ID3D12Device` may implement `ID3D12Device1`, but not necessarily through the original pointer.
 You can safely upcast where there is an explicit inheritance - e.g `ID3D12Device1` inherits from `ID3D12Device`, so it can be safely converted to an `ID3D12Device*`. However, an arbitrary `ID3D12Device`
 may have been created in some way where its child interfaces are exposed through aggregation rather than inheritance, so the returned object could be different. However, because that interface *does* directly inherit from `ID3D12Device`, you can safely upcast it. It's a little bit to wrap your head around.
@@ -227,9 +227,9 @@ ThrowIfFailed(device->CreateResource(..., IID_PPV_ARGS(&pRes)));
 
 ## HRESULTs
 
-A `HRESULT` is a 32 bit signed integer representing an error or success code. The reason for the naming is that it was originally a result-handle (like a `HWND` is a window-handle, a `HINSTANCE` is an instance-handle). But that was too heavy so it became a 32 bit signed integer instead.
+A `HRESULT` is a 32 bit signed integer representing an error or success code. The reason for the slightly strange naming is that it was originally a result-handle, rather than an error code, (like a `HWND` is a window-handle, a `HINSTANCE` is an instance-handle, a `HRESULT` was a result-handle). But that was too heavy and deemed unnecessary early on, so it became a 32 bit signed integer instead error code instead.
 
-A `HRESULT` has 3 elements - a severity (error or success), a facility (where it comes from), and a code (what it is). The severity is the sign bit, where a 1 (negative number) means an error and a 0 (positive number) means a success. This leads to the 2 macros in `winerror.h` of
+A `HRESULT` has 3 elements - a severity (error or success), a facility (where it comes from), and a code (what it is). The severity is the sign bit, where a 1 (negative number) means an error and a 0 (positive number) means a success. To inspect this bit, there are 2 macros in `winerror.h`:
 
 ```cpp
 #define FAILED(hr) (((HRESULT)(hr)) < 0)
@@ -250,7 +250,8 @@ The important error codes to know are:
 * `E_POINTER` - something is `null` that shouldn't be
 * `E_FAIL` - something went wrong!
 * `E_INVALIDARG` - ...pretty self explanatory
-* `E_OUTOFMEMORY` - can either mean local (system) memory or device (GPU) memory is exhausted - local memory exhaustion is generally fatal, but device memory exhaustation isn't
+* `E_NOINTERFACE` - an interface could not be provided or wasn't supported
+* `E_OUTOFMEMORY` - can either mean local (system) memory or device (GPU) memory is exhausted - local memory exhaustion is generally fatal, but device memory exhaustation often isn't
 
 * `D3D12_ERROR_ADAPTER_NOT_FOUND` - you are trying to use a shader/pipeline cache from a different adapter
 * `D3D12_ERROR_DRIVER_VERSION_MISMATCH` - you are trying to use a shader/pipeline cache (or serialized data) from a different driver version
@@ -273,9 +274,9 @@ All of the following indicate device removal:
 * WinRt `com_ptr` - as far as I know, the ""officially"" recommended one, but basically interchangeable with the other 2 in terms of quality
 * WIL `com_ptr_t`
 
-These 3 types all have one primary role, which is to manage `AddRef`/`Release` for you. So they `Release` at the end of their lifetime, and `AddRef` when copied, etc
+These 3 types all have one primary role, which is to manage `AddRef`/`Release` for you, so they `Release` at the end of their lifetime, and `AddRef` when copied, etc
 
-The noteworthy things:
+Some note-worthy points about these types:
 
 * WinRt `com_ptr` does not overload `&` to release the underlying address, so `IID_PPV_ARGS` doesn't work, so it sucks.
 * `com_ptr_t` and `ComPtr` both overload `&` (equivalent to `ReleaseAndGetAddress` for `ComPtr`, and `put` for `com_ptr_t`) so that it releases the underlying pointer (if one is present), so that `IID_PPV_ARGS` and using it as an output parameter works. **IMPORTANTLY**, do not use it as a single element array. E.g, I have seen
@@ -288,7 +289,7 @@ cmdList->SetDescriptorHeaps(1, &_resHeap); // you just released the descriptor h
 
 ## Debugging COM leaks
 
-COM leaks are a real, real, real pain to debug. Thankfully, DirectX has a fewer helpers that make viewing leaks a lot easier.
+COM leaks are a real, real, real pain to debug. Thankfully, DirectX has a fewer helpers that make discovering and fixing leaks a lot easier.
 
 Your first port of call should be `ID3D12DebugDevice::ReportLiveDeviceObjects` (`QueryInterface` the debug device off of the D3D12 device). I recommend using `D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL` flags for noticing leaks - you get object types and names (when named), and ignore stuff being kept alive by the D3D12 runtime, which aren't your responsibility.
 
