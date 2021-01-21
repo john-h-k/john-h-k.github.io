@@ -15,7 +15,7 @@
 
 ## COM vs Nano-COM
 
-* COM stands for Common Object Model, and is a programming interface standard made by microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like `CoCreateInstance` and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.
+* COM stands for Common Object Model, and is a programming interface standard made by Microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like `CoCreateInstance` and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.
 
 DirectX uses a interface model referred to casually as "Nano-COM", which utilises the ABI (application-binary interface - a topic for another article, but basically how different programs interact on a binary level, e.g parameter passing, errors, etc), as well as the error-code model of COM.
 
@@ -38,11 +38,11 @@ HRESULT QueryInterface(REFGUID pIID, void** ppvObject);
 
 All these methods will soon be explained - for now, just understand that any COM interface is implicitly convertable to an `IUnknown*`. Similar to Java's `Java.lang.Object` type or .NET's `System.Object` type, it acts as the base of all types in the ecosystem.
 
-> Note: You always work through COM objects with pointers. Never ever derefence them (if your language allows it). You will get horrible object slicing and inevitable mem corruption. :(
+> Note: You always work through COM objects with pointers. Never ever derefence them (if your language allows it). You will get horrible object slicing and inevitable memory corruption. :(
 
 ## Reference Counting
 
-COM objects are memory-managed by reference counting, where the COM object stores how many references to it exist to control its lifetime, and then destroys itself when there are non left (never use `delete` on a COM interface!). `AddRef` and `Release` are the 2 methods used for manipulating reference counts. `AddRef`, as the name suggests, increments the object's internal reference counter, and then it returns the *new* reference count. `Release` decrements the COM object's internal counter, and then it also returns the new reference count (note that the documentation for `IUnknown` says these return values should only be relied upon for testing purposes, and not for general code (it isn't your business how many references a COM object has!)). If the call to `Release` results in the counter decrementing to 0, then the COM object's lifetime ends, and it is destroyed. Any further calls on the object are undefined behaviour (you can't "revive" it with an `AddRef` call). It is worth noting that the D3D12 debug layer frequently will warn you of double-releasing an object, but often will simply crash if you invoke other methods on a destroyed object.
+COM objects are memory-managed by reference counting, where the COM object stores how many references to it exist to control its lifetime, and then destroys itself when there are none left (never use `delete` on a COM interface!). `AddRef` and `Release` are the 2 methods used for manipulating reference counts. `AddRef`, as the name suggests, increments the object's internal reference counter, and then it returns the *new* reference count. `Release` decrements the COM object's internal counter, and then it also returns the new reference count (note that the documentation for `IUnknown` says these return values should only be relied upon for testing purposes, and not for general code (it isn't your business how many references a COM object has!)). If the call to `Release` results in the counter decrementing to 0, then the COM object's lifetime ends, and it is destroyed, roughly speaking. However, the DirectX runtime may keep objects alive even when their ref count appears to be 0 because they are still in use - and in D3D11 there are cases where because of this behaviour, some objects were revivable. However, from an app perspective, this is fairly irrelevant and shouldn't be a concern. Any further calls on the object are undefined behaviour (you can't "revive" it with an `AddRef` call). It is worth noting that the D3D12 debug layer frequently will warn you of double-releasing an object, but often will simply crash if you invoke other methods on a destroyed object.
 
 ## PrivateDate and object names
 
@@ -67,7 +67,7 @@ HRESULT SetPrivateDataInterface(REFGUID guid, IUnknown* data);
 HRESULT SetName(/* I hate this type name too. It is a WCHAR*. Just a UTF16 string I promise */ LPCWSTR Name);
 ```
 
-This is just shorthand for `SetPrivateData` with `WKPDID_D3DDebugObjectNameW` (`WKPDID` means Well-Known Pointer to Data ID) GUID. For thin (non UTF16) strings, use `WKPDID_D3DDebugObjectName` and manual `SetPrivateData`.
+This is just shorthand for `SetPrivateData` with `WKPDID_D3DDebugObjectNameW` (`WKPDID` means Well-Known Pointer to Data ID) GUID. For ASCII strings, use `WKPDID_D3DDebugObjectName` and manual `SetPrivateData`.
 
 These are effectively hashmap methods on every object, allowing you to store arbitrary data in them. The most common one by far is storing the object name, either via `SetName` or `WKPDID_D3DDebugObjectNameW`/`WKPDID_D3DDebugObjectName`, which debugging tools and the DirectX runtime recognise for error messages, which makes life easier. Just generate a new IID for the data you want to store and tada, you can attach it.
 
@@ -115,11 +115,11 @@ std::wstring RetrieveName(ID3D12Object* pObj)
 * IID = Interface IDentifier
 * CLSID = CLass Identifier
 
-A GUID isn't a COM concept, and just means Globally-Unique ID. They are just a 128 bit value to identify something. Because 2^128 is big (really big. really really big. really really really big), you can generally assume any generated GUID is unique. Visual Studio has an inbuilt generator for one, or use [guidgenerator](https://guidgenerator.com).
+A GUID isn't a COM concept, and just means Globally-Unique ID. They are just a 128 bit value to identify something. Because 2^128 is big (really big. really really big. really really really big), you can generally assume any generated GUID is unique. Visual Studio has an inbuilt generator to create GUIDs for various formats, or you can use a website such as [guidgenerator](https://guidgenerator.com).
 
 An IID is used to identify an interface programmatically, as a sort of crude RTTI system. For example, the IID of `IUnknown` is `00000000-0000-0000-C000-000000000046`, and the IID of `ID3D12Device` is `189819F1-1DB6-4B57-BE54-1821339B85F7`.
 
-To retrieve an IID of an interface, in Visual C++ or C# (with `TerraFX.Interop.Windows`) you can use the `__uuidof` of operator to retrieve the interface.
+To retrieve an IID of an interface, in Visual C++ or C# (with `TerraFX.Interop.Windows`) you can use the `__uuidof` operator.
 
 You will commonly find the combination of an `IID` and a `void**` being used to represent some sort of COM interface output. The IID represents which interface you want to receive, and the `void**` is the
 actual pointer to be outputted to. For example, `QueryInterface` uses this pattern.
@@ -183,7 +183,7 @@ SomeIidPpvMethod(..., IID_PPV_ARGS(&res));
 You can find this macro in `combaseapi.h` as well as in the DirectX-Headers and DirectXTK12 repos on github.
 
 COM has both inheritance and aggregation, and uses `QueryInterface` to encompass both.
-Inheritance here meaning identity conversions (so your pointer to an `ID3D12Device7` is actually also an `ID3D12Device4`), whereas aggregation simply means the interface may contain the desired interface as a field, meaning can only be accessed through `QueryInterface`
+Inheritance here meaning identity conversions (so your pointer to an `ID3D12Device7` is actually also an `ID3D12Device4`), whereas aggregation simply means the interface may contain the desired interface as a field, meaning it can only be accessed through `QueryInterface`
 (your `ID3D12Devic4` might support `ID3D12Device7`, but it itself is not necessarily an `ID3D12Device7`).
 
 The `iid` parameter is the IID of the interface you want. `ppvObject` is a pointer to the interface-pointer it will be outputted to.
@@ -227,7 +227,7 @@ ThrowIfFailed(device->CreateResource(..., IID_PPV_ARGS(&pRes)));
 
 ## HRESULTs
 
-A `HRESULT` is a 32 bit signed integer representing an error or success code. The reason for the slightly strange naming is that it was originally a result-handle, rather than an error code, (like a `HWND` is a window-handle, a `HINSTANCE` is an instance-handle, a `HRESULT` was a result-handle). But that was too heavy and deemed unnecessary early on, so it became a 32 bit signed integer instead error code instead.
+A `HRESULT` is a 32 bit signed integer representing an error or success code. The reason for the slightly strange naming is that it was originally a result-handle, rather than an error code, (like a `HWND` is a window-handle, a `HINSTANCE` is an instance-handle, a `HRESULT` was a result-handle). But that was too heavy and deemed unnecessary early on, so it became a 32 bit signed integer error code instead.
 
 A `HRESULT` has 3 elements - a severity (error or success), a facility (where it comes from), and a code (what it is). The severity is the sign bit, where a 1 (negative number) means an error and a 0 (positive number) means a success. To inspect this bit, there are 2 macros in `winerror.h`:
 
@@ -289,8 +289,8 @@ cmdList->SetDescriptorHeaps(1, &_resHeap); // you just released the descriptor h
 
 ## Debugging COM leaks
 
-COM leaks are a real, real, real pain to debug. Thankfully, DirectX has a fewer helpers that make discovering and fixing leaks a lot easier.
+COM leaks are a real, real, real pain to debug. Thankfully, DirectX has a few helpers that make discovering and fixing leaks a lot easier.
 
 Your first port of call should be `ID3D12DebugDevice::ReportLiveDeviceObjects` (`QueryInterface` the debug device off of the D3D12 device). I recommend using `D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL` flags for noticing leaks - you get object types and names (when named), and ignore stuff being kept alive by the D3D12 runtime, which aren't your responsibility.
 
-`ID3DDestructionNotifier` is also a useful type. `QueryInterface` for it off of you D3D12 object, and then call `RegisterDestructionCallback` that will be called when the object is released (the ref count equals 0). You can then log this, set a breakpoint, etc - just note you cannot safely access the object, as it is partially through the destruction process.
+`ID3DDestructionNotifier` is also a useful type. `QueryInterface` for it off of you D3D12 object, and then call `RegisterDestructionCallback` that will be called when the object is released (the ref count equals 0). You can then log this, set a breakpoint, etc - just note you cannot safely access the object, as it may have started the destruction process and so the object's internal state is undefined.
