@@ -15,7 +15,7 @@
 
 ## COM vs Nano-COM
 
-* COM stands for Common Object Model, and is a programming interface standard made by Microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like `CoCreateInstance` and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.
+* COM stands for Component Object Model, and is a programming interface standard made by Microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like `CoCreateInstance` and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.
 
 DirectX uses a interface model referred to casually as "Nano-COM", which utilises the ABI (application-binary interface - a topic for another article, but basically how different programs interact on a binary level, e.g parameter passing, errors, etc), as well as the error-code model of COM.
 
