@@ -4,7 +4,7 @@ This page lists open-source .NET projects which provide bindings to native libra
 
 Go to the bottom of the page to search by a native DLL's name
 
-* [dotnet/PInvoke](https://github.com/dotnet/pinvoke) - higher level bindings for a large proportion of Win32 libraries. Great for general use, althought not always as performant as alternatives - targets .NET standard 2.0
+* [dotnet/pinvoke](https://github.com/dotnet/pinvoke) - higher level bindings for a large proportion of Win32 libraries. Great for general use, althought not always as performant as alternatives - targets .NET standard 2.0
 
 * [ClangSharp](https://github.com/microsoft/ClangSharp) - low level blittable bindings and a higher level C# API for Clang - targets .NET standard 2.0
 
