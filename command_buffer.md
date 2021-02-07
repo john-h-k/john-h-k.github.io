@@ -207,5 +207,6 @@ Work reordering is a coarser-grained version of command reordering, which more c
 
 ## Other
 
-Join the new Voltium discord! http://discord.voltium.org
+Join the new Voltium discord! [http://discord.voltium.org](http://discord.voltium.org)
+
 Email me at johnkellyoxford@gmail.com or tweet at @johnkdev
