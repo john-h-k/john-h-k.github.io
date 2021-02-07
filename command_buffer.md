@@ -13,8 +13,8 @@ There were 2 main methods to doing this that immediately came to mind:
 
 The virtual approach is probably the most intuitive to a C# developer. However, it has a few issues:
 
-* It requires re-writing the current command list inheritance (`CopyContext` -> `ComputeContext` -> `GraphicsContext`) to be interface based (`ICopyContext` -> `IComputeContext` -> `GraphicsContex`),
-  else it requires each backend implemenation (e.g `VkCopyContext`, `VkComputContext`) to duplicate all shared code (as you couldn't have `VkComputeContext` inheriting from `VkCopyContext`,
+* It requires re-writing the current command list inheritance (`CopyContext` -> `ComputeContext` -> `GraphicsContext`) to be interface based (`ICopyContext` -> `IComputeContext` -> `GraphicsContext`),
+  else it requires each backend implemenation (e.g `VkCopyContext`, `VkComputeContext`) to duplicate all shared code (as you couldn't have `VkComputeContext` inheriting from `VkCopyContext`,
   as it must inherit from `ComputeContext`, which only inherits from `CopyContext`)
 * It requires double indirection at each and every callsite (instruction cache thrashing, unnecessary slowdown)
 
