@@ -71,6 +71,14 @@ class Argan {
         this.draw()
     }
 
+    reset(removeCircles) {
+        this.points = {}
+
+        if (removeCircles) {
+            this.circles = {}
+        }
+    }
+
     markCircle(label, radius) {
         this.circles[label] = {
             radius: radius,
@@ -347,6 +355,8 @@ class DisplayedPolynomial {
 
 
     #setPageCoefficients() {
+        coefficients.reset()
+
         let first = document.getElementById(`coefficient_0`)
         let clone = first.cloneNode(true)
         let parent = first.parentNode
@@ -378,6 +388,8 @@ class DisplayedPolynomial {
     }
 
     #setPageRoots() {
+        roots.reset()
+        
         let first = document.getElementById(`root_0`)
         let clone = first.cloneNode(true)
         let parent = first.parentNode
