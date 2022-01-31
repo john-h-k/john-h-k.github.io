@@ -5,9 +5,13 @@
 <body>
     <div class="flex flex-row items-stretch w-full">
         <div id="coefficients-container" class="flex-1">
-            <div>
+            <div class="h-20">
                 <h2 class="text-center">Coefficients</h2>
-                <p id="equation"></p>
+                <div class="flex flex-row content-center items-center">
+                    <p id="equation" class="flex-1 pt-4"></p>
+                    <input type="number" id="degree" name="degree" value="2" min="1" max="6" class="p-1 flex-initial border-2 border-black align-center"/>
+                    <p class="flex-1 pt-4"></p>
+                </div>
             </div>
             <canvas id="coefficients" class="aspect-square w-full border-2 border-black">
 
@@ -19,7 +23,7 @@
             </div>
         </div>
         <div id="roots-container" class="flex-1">
-            <div>
+            <div class="h-20">
                 <h2 class="text-center">Roots</h2>
             </div>
             <canvas id="roots" class="aspect-square w-full border-2 border-black">

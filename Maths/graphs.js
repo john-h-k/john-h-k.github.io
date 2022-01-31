@@ -291,7 +291,7 @@ class DisplayedPolynomial {
 
         let equationParts = []
         for (let i = 0; i < degree + 1; i++) {
-            equationParts.push(`${CoefficientNames[i]}^${degree - i}`)
+            equationParts.push(`${CoefficientNames[i]}x^${degree - i}`)
         }
 
         this.equation = equationParts.join(" + ")
@@ -425,7 +425,19 @@ Object.defineProperty(Complex.prototype, "mod", {
 const coefficients = new Argan("coefficients")
 const roots = new Argan("roots")
 
-const quadratic = new DisplayedPolynomial(3, [1, 3, 0, 2])
+const degreeInput = document.getElementById("degree")
+degreeInput.addEventListener('input', function() {
+    let randomCoefficients = [];
 
-coefficients.draw()
-roots.draw()
+    const randomComplex = () => math.complex(math.random(-2, 2), math.random(-2, 2))
+
+    const degree = parseInt(degreeInput.value)
+
+    randomCoefficients = Array(degree + 1).fill(0).map(_ => randomComplex())
+    const polynomial = new DisplayedPolynomial(degree, randomCoefficients)
+
+    coefficients.draw()
+    roots.draw()
+})
+
+degreeInput.dispatchEvent(new Event('input'));
