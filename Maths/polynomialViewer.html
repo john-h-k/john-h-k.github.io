@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="output.css">
+</head>
+<body>
+    <div class="flex flex-row items-stretch w-full">
+        <div id="coefficients-container" class="flex-1">
+            <div>
+                <h2 class="text-center">Coefficients</h2>
+                <p id="equation"></p>
+            </div>
+            <canvas id="coefficients" class="aspect-square w-full border-2 border-black">
+
+            </canvas>
+            <div class="flex flex-row">
+                <div id="coefficient_0" class="coefficient">
+                    <span class="name">a</span> = <span class="value">0</span>
+                </div>
+            </div>
+        </div>
+        <div id="roots-container" class="flex-1">
+            <div>
+                <h2 class="text-center">Roots</h2>
+            </div>
+            <canvas id="roots" class="aspect-square w-full border-2 border-black">
+
+            </canvas>
+            <div class="flex flex-row">
+                <div id="root_0" class="root">
+                    <span class="name">x0</span> = <span class="value">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="libs/fraction.js"></script> <!-- Needed for field/ring Q -->
+<script src="libs/complex.js"></script> <!-- Needed for field C -->
+<script src="libs/rootGuess.js"></script> <!-- Needed for field C -->
+<script src="libs/polynomial.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.1.0/math.js" integrity="sha512-UvIACSDvB2RfwkjYTjYkuJq901Y6L4nZNoOHZMRBvSdIiIm3BFrtOdgjr5EZSPYR5cU/P6XUW6TN/578FuTysw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="graphs.js"></script>
