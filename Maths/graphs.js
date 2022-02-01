@@ -6,6 +6,10 @@ function ratio(x, a, b) {
     return (x - a) / (b - a)
 }
 
+function toMaxPrecision(value, n) {
+    return (value < 0 ? "" : "") + parseFloat(value.toPrecision(n)).toString()
+}
+
 // function polyToMath(c) {
 //     return c instanceof Complex ? math.complex(c.re, c.im) : math.complex(c, 0)
 // }
@@ -28,9 +32,6 @@ class Argan {
         this.circles = {}
 
         this.canvas.onmousedown = function(ev) {
-            ev.preventDefault()
-            ev.stopPropagation()
-
             let [x, y] = this.#canvasMouseCoordinates(ev)
 
             for (const point of Object.values(this.points)) {
@@ -40,6 +41,9 @@ class Argan {
 
                 if (Math.sqrt(Math.pow(x - a, 2) + Math.pow(y - b, 2)) < clickRadius) {
                     this.draggedItem = point
+
+                    ev.preventDefault()
+                    ev.stopPropagation()
                 }
             }
         }.bind(this)
@@ -99,12 +103,12 @@ class Argan {
         this.movePoint(label, value)
     }
 
-    movePoint(label, value) {
+    movePoint(label, value, context) {
         const point = this.points[label]
 
         point.value = value
         if (point.onMoveCallback != null) {
-            point.onMoveCallback(point)
+            point.onMoveCallback(point, context)
         }
     }
 
@@ -322,13 +326,22 @@ class DisplayedPolynomial {
         this.coefficients = poly.coeffArray.slice().reverse()
     }
 
-    #changeCoefficient(point) {
+    setCoefficient(index, value) {
+        coefficients.movePoint(CoefficientNames[index], value, true)
+    }
+
+    #changeCoefficient(point, entryBoxChange) {
         let index = CoefficientNames.indexOf(point.label)
         let div = document.getElementById(`coefficient_${index}`)
 
-        div.querySelector(".value").innerHTML = point.value.format(5)
-
         this.coefficients[index] = point.value
+
+        if (entryBoxChange) {
+            coefficients.draw()
+        } else {
+            div.querySelector("input[name='reValue']").value = toMaxPrecision(point.value.re, 5)
+            div.querySelector("input[name='imValue']").value = toMaxPrecision(point.value.im, 5)
+        }
 
         this.#solveRoots()
     }
@@ -366,9 +379,7 @@ class DisplayedPolynomial {
 
         first = clone
 
-        coefficients.markPoint(CoefficientNames[0], this.coefficients[0], function(point) {  
-            this.#changeCoefficient(point)
-        }.bind(this))
+        coefficients.markPoint(CoefficientNames[0], this.coefficients[0], this.#changeCoefficient.bind(this))
 
         for (let i = 1; i < this.degree + 1; i++) {
             const label = CoefficientNames[i]
@@ -381,15 +392,13 @@ class DisplayedPolynomial {
 
             parent.appendChild(clone)
 
-            coefficients.markPoint(label, coefficient, function(point) {  
-                this.#changeCoefficient(point)
-            }.bind(this))
+            coefficients.markPoint(label, coefficient, this.#changeCoefficient.bind(this))
         }
     }
 
     #setPageRoots() {
         roots.reset()
-        
+
         let first = document.getElementById(`root_0`)
         let clone = first.cloneNode(true)
         let parent = first.parentNode
@@ -438,6 +447,9 @@ const coefficients = new Argan("coefficients")
 const roots = new Argan("roots")
 
 const degreeInput = document.getElementById("degree")
+
+let polynomial;
+
 degreeInput.addEventListener('input', function() {
     let randomCoefficients = [];
 
@@ -446,10 +458,31 @@ degreeInput.addEventListener('input', function() {
     const degree = parseInt(degreeInput.value)
 
     randomCoefficients = Array(degree + 1).fill(0).map(_ => randomComplex())
-    const polynomial = new DisplayedPolynomial(degree, randomCoefficients)
+    polynomial = new DisplayedPolynomial(degree, randomCoefficients)
 
     coefficients.draw()
     roots.draw()
 })
 
 degreeInput.dispatchEvent(new Event('input'));
+
+for (const input of document.querySelectorAll("input[name='reValue'], input[name='imValue']")) {
+    input.addEventListener('input', function(ev) {
+        ev.preventDefault()
+        ev.stopPropagation()
+
+        const target = ev.target
+
+        let index = parseInt(target.parentNode.id.match(/coefficient_(\d)/)[1])
+        let change = parseFloat(target.value)
+        let value
+
+        if (target.getAttribute("name") == "reValue") {
+            value = math.complex(change, polynomial.coefficients[index].im)
+        } else {
+            value = math.complex(polynomial.coefficients[index].re, change)
+        }
+
+        polynomial.setCoefficient(index, value)
+    })
+}

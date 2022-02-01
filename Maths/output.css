@@ -438,8 +438,24 @@ Ensure the default browser behavior of the `hidden` attribute.
   --tw-filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
-.m-2 {
-  margin: 0.5rem;
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.left-0 {
+  left: 0px;
+}
+
+.bottom-0 {
+  bottom: 0px;
+}
+
+.-ml-2 {
+  margin-left: -0.5rem;
 }
 
 .inline {
@@ -462,6 +478,14 @@ Ensure the default browser behavior of the `hidden` attribute.
   width: 100%;
 }
 
+.w-1\/4 {
+  width: 25%;
+}
+
+.w-\[5\.5rem\] {
+  width: 5.5rem;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -472,6 +496,10 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .flex-row {
   flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
 }
 
 .content-center {
@@ -486,6 +514,10 @@ Ensure the default browser behavior of the `hidden` attribute.
   align-items: stretch;
 }
 
+.gap-2 {
+  gap: 0.5rem;
+}
+
 .border-2 {
   border-width: 2px;
 }
@@ -493,10 +525,6 @@ Ensure the default browser behavior of the `hidden` attribute.
 .border-black {
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity));
-}
-
-.p-2 {
-  padding: 0.5rem;
 }
 
 .p-1 {
@@ -507,8 +535,16 @@ Ensure the default browser behavior of the `hidden` attribute.
   padding-top: 1rem;
 }
 
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
 .text-center {
   text-align: center;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .filter {
@@ -518,4 +554,12 @@ Ensure the default browser behavior of the `hidden` attribute.
 div {
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
 }
