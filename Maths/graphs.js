@@ -7,7 +7,7 @@ function ratio(x, a, b) {
 }
 
 function toMaxPrecision(value, n) {
-    return (value < 0 ? "" : "") + parseFloat(value.toPrecision(n)).toString()
+    return parseFloat(value.toPrecision(n)).toString()
 }
 
 // function polyToMath(c) {
@@ -339,8 +339,8 @@ class DisplayedPolynomial {
         if (entryBoxChange) {
             coefficients.draw()
         } else {
-            div.querySelector("input[name='reValue']").value = toMaxPrecision(point.value.re, 5)
-            div.querySelector("input[name='imValue']").value = toMaxPrecision(point.value.im, 5)
+            div.querySelector("input[name='reValue']").value = toMaxPrecision(point.value.re, 4)
+            div.querySelector("input[name='imValue']").value = toMaxPrecision(point.value.im, 4)
         }
 
         this.#solveRoots()
