@@ -1,25 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>[[TITLE]]</title>
+  <title>DirectDrawSurface (DDS) files</title>
   <link rel="stylesheet" type="text/css" href="../../styles.css">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
   <script defer>
+    // GitHub markdown API quirk - when you use `bash` syntax highlighting it generates `shell`.
+    // `highlight.js` shell highlighting is awful, so change it to bash
     document.addEventListener('DOMContentLoaded', (event) => {
-      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
-      document.querySelectorAll('div.highlight pre').forEach((block) => {
-        hljs.highlightElement(block);
+      document.querySelectorAll('.highlight-source-shell').forEach((element) => {
+        element.classList.remove('highlight-source-shell');
+        element.classList.add('highlight-source-bash');
       });
     });
+
+    hljs.configure({
+      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
+      cssSelector: 'div.highlight pre',
+      // The GitHub markdown API generates `highlight-source-<LANG>`
+      languageDetectRe: /\bhighlight-source-([\w-]+)\b/i,
+    });
+
+    hljs.highlightAll();
   </script>
 </head>
 <body>
 
   <header>
-    <h1>[[TITLE]]</h1>
+    <h1>DirectDrawSurface (DDS) files</h1>
   </header>
 
   <main>

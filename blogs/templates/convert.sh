@@ -29,14 +29,18 @@ for file in $(fd . "$template_dir" --extension md); do
         /markdown \
       > "$output_name.tmp"
   
-    # | curl --silent --data @- https://api.github.com/markdown > "$output_name.tmp"
+  title="$(head -1 "$file" | sed 's/^ *# *//')"
+  escaped_title="$(printf '%q' "$title")"
+  content="$(cat "$output_name.tmp" | tr -d '\n')"
+  footer=""
+  escaped_footer="$(printf '%q' "$footer")"
 
-  content=$(cat "$output_name.tmp" | tr -d '\n')
+  gsed -i "s/\[\[TITLE\]\]/$escaped_title/g" "$output_name"
+  gsed -i "s/\[\[FOOTER\]\]/$escaped_footer/g" "$output_name"
   gsed -i "/[[BODY]]/{
     r $output_name.tmp
     d
   }" "$output_name"
-  # sed -i '' "s/[[BODY]]/$content/" "$output_name"
-  # awk 'BEGIN{getline l < "$output_name.tmp"}/\[\[BODY\]\]/{gsub("[[BODY]]",l)}1' "$output_name"
+
   rm "$output_name.tmp"
 done
