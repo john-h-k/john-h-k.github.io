@@ -81,3 +81,23 @@ footer {
   margin: 10px 0;              /* Margin */
   overflow-x: auto;            /* Scroll bar if the code is wide */
 }
+
+blockquote {
+  border-left: 4px solid #007bff;  /* Blue border on the left */
+  background-color: #f8f9fa;  /* Light gray background */
+  margin: 20px 0;  /* Vertical spacing */
+  padding: 10px 20px;  /* Padding */
+  quotes: "\201C""\201D""\2018""\2019";  /* Add quote marks */
+}
+
+blockquote:before {
+  content: open-quote;  /* Opening quote */
+  font-size: 4em;
+  line-height: 0.1em;
+  margin-right: 0.25em;
+  vertical-align: -0.4em;
+}
+
+blockquote p {
+  display: inline;  /* To keep quote symbol and text together */
+}
