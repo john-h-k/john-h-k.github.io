@@ -7,6 +7,14 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
+      document.querySelectorAll('div.highlight pre').forEach((block) => {
+        hljs.highlightElement(block);
+      });
+    });
+  </script>
 </head>
 <body>
 
@@ -16,8 +24,7 @@
 
   <main>
     <article id="article-id" class="blog-article">
-<h1><a id="user-content-pointers" class="anchor" aria-hidden="true" tabindex="-1" href="#pointers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Pointers</h1>
-    </article>
+<h1>Pointers</h1>    </article>
   </main>
 
   <footer>

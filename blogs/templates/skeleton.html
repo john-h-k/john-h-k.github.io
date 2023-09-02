@@ -7,6 +7,14 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
+      document.querySelectorAll('div.highlight pre').forEach((block) => {
+        hljs.highlightElement(block);
+      });
+    });
+  </script>
 </head>
 <body>
 
