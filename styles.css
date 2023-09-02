@@ -1,0 +1,75 @@
+/* Reset some browser default styles */
+body, h1, h2, p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Set background and font */
+body {
+  background-color: #fff;
+  font-family: 'Courier New', monospace;
+}
+
+/* Style the header */
+header {
+  background-color: #fff;
+  color: #333;
+  text-align: center;
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Style the main content */
+main {
+  width: 70%;
+  margin: 20px auto;
+}
+
+/* Style each article */
+article {
+  background-color: #fff;
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+/* Style the footer */
+footer {
+  background-color: #fff;
+  color: #333;
+  text-align: center;
+  padding: 1rem;
+  border-top: 1px solid #ccc;
+}
+
+/* Table of contents styling */
+.toc-container {
+  padding: 1rem;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.toc-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.toc-list li {
+  margin: 0.5rem 0;
+}
+
+.toc-list li a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.toc-list li a:hover {
+  text-decoration: underline;
+}
+
+.toc-list li code {
+  background-color: #f8f9fa;
+  padding: 2px 4px;
+  font-size: 90%;
+}
