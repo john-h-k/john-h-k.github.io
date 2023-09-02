@@ -1,3 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>[[TITLE]]</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>[[TITLE]]</h1>
+  </header>
+
+  <main>
+    <article id="article-id" class="blog-article">
 <h1><a id="user-content-why-do-i-get-column-must-appear-in-the-group-by-clause-or-be-used-in-an-aggregate-function" class="anchor" aria-hidden="true" tabindex="-1" href="#why-do-i-get-column-must-appear-in-the-group-by-clause-or-be-used-in-an-aggregate-function"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why do I get 'column must appear in the GROUP BY clause or be used in an aggregate function'?</h1>
 <p>This is an error I see plague people new to SQL, and I find the Stack Overflow posts that come up when googling it to be pretty useless, so I thought I'd write up some help on it.</p>
 <p>Let's query our imaginary database for all our users.</p>
@@ -90,3 +104,12 @@ Character: 8
 </blockquote>
 <div class="highlight highlight-source-sql"><pre><span class="pl-k">SELECT</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>, <span class="pl-c1">COUNT</span>(posts) OVER (PARTITION BY <span class="pl-c1">users</span>.<span class="pl-c1">id</span>) <span class="pl-k">FROM</span> users <span class="pl-k">JOIN</span> posts <span class="pl-k">ON</span> <span class="pl-c1">posts</span>.<span class="pl-c1">user_id</span> <span class="pl-k">=</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span> <span class="pl-k">GROUP BY</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>;</pre></div>
 <p>You can see how in this simple query it is effectively the same as the <code>GROUP BY</code> above. This isn't very useful here, but it can be where a <code>GROUP BY</code> isn't possible or has unwanted side effects.</p>
+    </article>
+  </main>
+
+  <footer>
+    <p>[[FOOTER]]</p>
+  </footer>
+
+</body>
+</html>

@@ -1,3 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>[[TITLE]]</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>[[TITLE]]</h1>
+  </header>
+
+  <main>
+    <article id="article-id" class="blog-article">
 <h1><a id="user-content-nano-com" class="anchor" aria-hidden="true" tabindex="-1" href="#nano-com"><span aria-hidden="true" class="octicon octicon-link"></span></a>Nano-COM</h1>
 <h2><a id="user-content-table-of-contents" class="anchor" aria-hidden="true" tabindex="-1" href="#table-of-contents"><span aria-hidden="true" class="octicon octicon-link"></span></a>Table Of Contents</h2>
 <ul>
@@ -238,3 +252,12 @@ cmdList-&gt;<span class="pl-en">SetDescriptorHeaps</span>(<span class="pl-c1">1<
 <p>COM leaks are a real, real, real pain to debug. Thankfully, DirectX has a few helpers that make discovering and fixing leaks a lot easier.</p>
 <p>Your first port of call should be <code>ID3D12DebugDevice::ReportLiveDeviceObjects</code> (<code>QueryInterface</code> the debug device off of the D3D12 device). I recommend using <code>D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL</code> flags for noticing leaks - you get object types and names (when named), and ignore stuff being kept alive by the D3D12 runtime, which aren't your responsibility.</p>
 <p><code>ID3DDestructionNotifier</code> is also a useful type. <code>QueryInterface</code> for it off of you D3D12 object, and then call <code>RegisterDestructionCallback</code> that will be called when the object is released (the ref count equals 0). You can then log this, set a breakpoint, etc - just note you cannot safely access the object, as it may have started the destruction process and so the object's internal state is undefined.</p>
+    </article>
+  </main>
+
+  <footer>
+    <p>[[FOOTER]]</p>
+  </footer>
+
+</body>
+</html>
