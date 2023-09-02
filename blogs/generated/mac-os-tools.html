@@ -19,7 +19,7 @@
 
     hljs.configure({
       // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
-      cssSelector: 'div.highlight pre',
+      cssSelector: 'div.highlight pre, pre code',
       // The GitHub markdown API generates `highlight-source-<LANG>`
       languageDetectRe: /\bhighlight-source-([\w-]+)\b/i,
     });

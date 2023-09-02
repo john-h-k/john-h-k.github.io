@@ -75,7 +75,7 @@ footer {
   font-size: 90%;
 }
 
-.highlight {
+div.highlight pre, pre code {
   background-color: #f8f9fa;  /* Light gray background */
   border: 1px solid #ccc;      /* Border */
   padding: 10px;               /* Padding */
