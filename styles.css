@@ -7,7 +7,8 @@ body, h1, h2, p {
 /* Set background and font */
 body {
   background-color: #fff;
-  font-family: 'Courier New', monospace;
+  /* font-family: 'Courier New', monospace; */
+  font-family: 'Roboto', sans-serif;
 }
 
 /* Style the header */
