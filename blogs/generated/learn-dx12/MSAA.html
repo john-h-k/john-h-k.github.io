@@ -1,0 +1,12 @@
+<h1><a id="user-content-multisample-anti-aliasing" class="anchor" aria-hidden="true" tabindex="-1" href="#multisample-anti-aliasing"><span aria-hidden="true" class="octicon octicon-link"></span></a>Multisample Anti Aliasing</h1>
+<h2><a id="user-content-table-of-contents" class="anchor" aria-hidden="true" tabindex="-1" href="#table-of-contents"><span aria-hidden="true" class="octicon octicon-link"></span></a>Table Of Contents</h2>
+<ul>
+<li><a href="What%20is%20MSAA?">What is MSAA?</a></li>
+</ul>
+<h2><a id="user-content-what-is-msaa" class="anchor" aria-hidden="true" tabindex="-1" href="#what-is-msaa"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is MSAA?</h2>
+<p>MSAA stands for Multi-Sampled Anti Aliasing. It is a way of reducing aliasing (jaggedy edges). This article won't focus too much on anti-aliasing in general, and will focus on MSAA.
+However, understanding SSAA is somewhat useful in understanding MSAA. SSA is Super-Sampled Anti Aliasing. It is pretty simple, and just means you render at a higher resolution than your target
+(e.g rendering at 4k for a 1080p monitor) and then downsampling. This means you get 2/4/8/however many pixels in the render ending up as 1 pixel in the final output. If you blend these pixels
+to get the final result - this leads to smoother gradients between pixels along edges, and has a natural anti-aliasing effect. However, this is very <em>very</em> expensive, as it means 4x the pixel
+shader invocations and 4x the memory bandwith, etc.</p>
+<p>MSAA works</p>

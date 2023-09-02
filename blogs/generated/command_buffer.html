@@ -1,0 +1,168 @@
+<h1><a id="user-content-creating-a-new-command-buffer-system-for-voltium" class="anchor" aria-hidden="true" tabindex="-1" href="#creating-a-new-command-buffer-system-for-voltium"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating a new command buffer system for Voltium</h1>
+<p>While writing the Vulkan backend for Voltium, and absent mindedly pondering the OpenGLES backend that will be inevitable for mobile support,
+I started to cringe at how crinkly and fragile the current (preprocessor-based) backend system was. I realised that for maintenance reasons, decoupling the API agnostic frontend
+and the API specific backend is essential. However, performance is still as much of a priority as ever, and any move away from this must justify its design by enabling new optimisations
+and being a fast, efficient API, for both the front and backend.</p>
+<p>There were 2 main methods to doing this that immediately came to mind:</p>
+<ul>
+<li>Virtuals</li>
+<li>Multiple DLL backends</li>
+</ul>
+<p>The virtual approach is probably the most intuitive to a C# developer. However, it has a few issues:</p>
+<ul>
+<li>It requires re-writing the current command list inheritance (<code>CopyContext</code> -&gt; <code>ComputeContext</code> -&gt; <code>GraphicsContext</code>) to be interface based (<code>ICopyContext</code> -&gt; <code>IComputeContext</code> -&gt; <code>GraphicsContext</code>),
+else it requires each backend implemenation (e.g <code>VkCopyContext</code>, <code>VkComputeContext</code>) to duplicate all shared code (as you couldn't have <code>VkComputeContext</code> inheriting from <code>VkCopyContext</code>,
+as it must inherit from <code>ComputeContext</code>, which only inherits from <code>CopyContext</code>)</li>
+<li>It requires double indirection at each and every callsite (instruction cache thrashing, unnecessary slowdown)</li>
+</ul>
+<p>The multiple DLL approach is very interesting, and I still think it is a novel and performant approach, but it isn't flawless:</p>
+<ul>
+<li>No hot-swapping (although, this was always an explicit non-priority for Voltium)</li>
+<li>Requires explicit DLL loading</li>
+<li>Requires clunky ref assembly and splitting API agnostic + API dependant parts</li>
+<li>Uses ugly preprocessor defines or code duplication</li>
+</ul>
+<p>However, someone else suggested I investigate using a software command buffer format, where I encode my own commands instead of immediately calling the native API, so I investigated this approach.
+The general gist is that you emit some form of stream or array of commands when the commands are actually recorded, and at a later stage (e.g when the commands are actually submitted to the GPU)
+the commands are encoded via the native API.</p>
+<h2><a id="user-content-motivations-for-this-approach" class="anchor" aria-hidden="true" tabindex="-1" href="#motivations-for-this-approach"><span aria-hidden="true" class="octicon octicon-link"></span></a>Motivations for this approach</h2>
+<p>This design meets all the design goals I wanted for Voltium's command API. Principally:</p>
+<ul>
+<li>A single type for command recording (API agnostic)</li>
+<li>Efficient, very performant, minimal overhead recording with no sync primitives/syscalls</li>
+<li>Allows easy debugging and replay of command buffers</li>
+<li>Serialization/deserialization of command buffers</li>
+<li>Allows buffer optimisation and analysis</li>
+<li>Allows constant best-case command allocator behaviour</li>
+</ul>
+<h2><a id="user-content-stream-design" class="anchor" aria-hidden="true" tabindex="-1" href="#stream-design"><span aria-hidden="true" class="octicon octicon-link"></span></a>Stream design</h2>
+<p>The design priorities of the stream are:</p>
+<ul>
+<li>Ease of parsing</li>
+<li>Memory efficiency</li>
+<li>Must be strongly API agnostic</li>
+<li>Performant to encode/decode</li>
+</ul>
+<p>The most intuitive design to a C# developer might be something like:</p>
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">abstract</span> <span class="pl-k">class</span> Command<span class="pl-kos">;</span>
+
+<span class="pl-k">sealed</span> <span class="pl-k">class</span> DrawCommand <span class="pl-c1">:</span> <span class="pl-smi">Command</span><span class="pl-kos">;</span>
+<span class="pl-k">sealed</span> <span class="pl-k">class</span> BeginRenderPassCommand <span class="pl-c1">:</span> <span class="pl-smi">Command</span><span class="pl-kos">;</span>
+<span class="pl-k">sealed</span> <span class="pl-k">class</span> DispatchCommand <span class="pl-c1">:</span> <span class="pl-smi">Command</span><span class="pl-kos">;</span>
+<span class="pl-c">// etc</span></pre></div>
+<p>and using a <code>Command[]</code> to encode the commands. However, this has a few major drawbacks:</p>
+<ul>
+<li>Unfriendly to serialization</li>
+<li>Unfriendly to caches - constant type checks and constant cache thrashing across objects</li>
+<li>Allocation heavy (although a command cache can alleviate this somewhat)</li>
+</ul>
+<p>Using an enum to represent each command type, and then a struct which can be any command, results in the most cache-friendly parsing pattern.
+Having a struct which just contains every command is infeasible due to the size of the struct, so a union is required. However, this still has ineffeciency. Consider an <code>EndRenderPass</code> command.
+This needs no parameters at all, so why should it take as much space as a <code>BeginRenderPass</code> command which takes a large amount of metadata? To solve this issue, commands in the buffer are variable size.
+Each command can either be:</p>
+<ul>
+<li>Empty - no parameters. The next command is simply retrieved by offsetting the pointer by the size of the enum</li>
+<li>Fixed size, e.g a draw. The next command is retrieved by offsetting the pointer by the size of the enum and the size of the parameter struct</li>
+<li>Variable size, e.g a texture clear (which can take 0-&gt;n rectangles). The next command is retrieved by offsetting the point by the size of the enum, the size of the struct, and the number of tail elements (which is stored in the parameters) multiplied by the size of the tail element</li>
+</ul>
+<p>The command format is entirely API agnostic, and serializable. Due to the variable-length nature of the encoding, command types must be unmanaged (as the GC cannot understand the offsets of object refs in the buffer). Most objects (pipeline state objects, buffers, textures, acceleration structures, query heaps) are represented by strongly-typed opaque <code>uint64</code> handles. These handles are serialization friendly (a mapping can be serialized to indicate which handles represent which types of objects, or the actual objects the handles represent can be serialized for a fully independent replayable command buffer).</p>
+<p>Using these formats also brings in other implicit advantages:</p>
+<ul>
+<li>Other frontends - any given engine frontend can utilise the Voltium backend, it just needs to have a shim to emit the right command buffer</li>
+<li>Debugging/profiling - the entire command buffer can be decoded and printed, analyzed, and saved for later</li>
+<li>Decoupling - command recording is no longer API-dependant. No syscalls, potential syncprim acquires, or unmanaged shenanigans. The only possible expense is having to resize the underlying command buffer size</li>
+<li>Optimisation - you can analyse and view the entire buffer (due to the serial nature of encoding)</li>
+</ul>
+<h2><a id="user-content-encoding-a-command-buffer" class="anchor" aria-hidden="true" tabindex="-1" href="#encoding-a-command-buffer"><span aria-hidden="true" class="octicon octicon-link"></span></a>Encoding a command buffer</h2>
+<p>Encoding a command buffer must be fast and non-complex. There are 3 primary types involved in encoding a command buffer:</p>
+<ul>
+<li>
+<code>ContextEncoder</code> - for emitting the commands to memory</li>
+<li>
+<code>CommandType</code> - for indicating which type you emit</li>
+<li>
+<code>ICommand</code> - the base interface for each command</li>
+</ul>
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">interface</span> <span class="pl-smi">ICommand</span>
+<span class="pl-kos">{</span>
+    <span class="pl-smi">CommandType</span> <span class="pl-s1">Command</span><span class="pl-kos">;</span>
+<span class="pl-kos">}</span>
+
+<span class="pl-c">// example:</span>
+<span class="pl-k">struct</span> <span class="pl-smi">CommandDraw</span> <span class="pl-c1">:</span> <span class="pl-smi">ICommand</span>
+<span class="pl-kos">{</span>
+    <span class="pl-k">public</span> <span class="pl-smi">CommandType</span> <span class="pl-s1">Type</span> <span class="pl-c1">=&gt;</span> CommandType<span class="pl-kos">.</span>Draw<span class="pl-kos">;</span>
+
+    <span class="pl-k">public</span> <span class="pl-smi">uint</span> <span class="pl-s1">IndexCountPerInstance</span><span class="pl-kos">;</span>
+    <span class="pl-k">public</span> <span class="pl-smi">uint</span> <span class="pl-s1">InstanceCount</span><span class="pl-kos">;</span>
+    <span class="pl-k">public</span> <span class="pl-smi">uint</span> <span class="pl-s1">StartIndexLocation</span><span class="pl-kos">;</span>
+    <span class="pl-k">public</span> <span class="pl-smi">uint</span> <span class="pl-s1">BaseVertexLocation</span><span class="pl-kos">;</span>
+    <span class="pl-k">public</span> <span class="pl-smi">uint</span> <span class="pl-s1">StartInstanceLocation</span><span class="pl-kos">;</span>
+<span class="pl-kos">}</span></pre></div>
+<p><code>ContextEncoder</code> allows you to emit commands in 3 manners:</p>
+<div class="highlight highlight-source-cs"><pre><span class="pl-smi">void</span> <span class="pl-en">EmitEmpty</span><span class="pl-kos">(</span><span class="pl-smi">CommandType</span> <span class="pl-s1">command</span><span class="pl-kos">)</span><span class="pl-kos">;</span></pre></div>
+<p>This method is used to emit commands with no parameteres, and simply writes it to the stream and advances.</p>
+<div class="highlight highlight-source-cs"><pre><span class="pl-smi">void</span> <span class="pl-en">Emit</span><span class="pl-c1">&lt;</span><span class="pl-c1">TCommand</span><span class="pl-c1">&gt;</span><span class="pl-kos">(</span><span class="pl-smi">TCommand<span class="pl-c1">*</span></span> <span class="pl-s1">pCommand</span><span class="pl-kos">)</span> <span class="pl-k">where</span> <span class="pl-c1">TCommand</span> <span class="pl-c1">:</span> unmanaged<span class="pl-kos">,</span> <span class="pl-smi">ICommand</span><span class="pl-kos">;</span></pre></div>
+<p>This method is used to emit a fixed-size command, such as a draw:</p>
+<div class="highlight highlight-source-cs"><pre><span class="pl-smi">var</span> <span class="pl-s1">commandDraw</span> <span class="pl-c1">=</span> <span class="pl-k">new</span> CommandDraw
+<span class="pl-kos">{</span>
+    <span class="pl-s1">IndexCountPerInstance</span> <span class="pl-c1">=</span> <span class="pl-s1">indexCountPerInstance</span><span class="pl-kos">,</span>
+    <span class="pl-s1">InstanceCount</span> <span class="pl-c1">=</span> <span class="pl-s1">instanceCount</span><span class="pl-kos">,</span>
+    <span class="pl-s1">StartIndexLocation</span> <span class="pl-c1">=</span> <span class="pl-s1">startIndexLocation</span><span class="pl-kos">,</span>
+    <span class="pl-s1">BaseVertexLocation</span> <span class="pl-c1">=</span> <span class="pl-s1">baseVertexLocation</span><span class="pl-kos">,</span>
+    <span class="pl-s1">StartInstanceLocation</span> <span class="pl-c1">=</span> <span class="pl-s1">startInstanceLocation</span><span class="pl-kos">,</span>
+<span class="pl-kos">}</span>
+
+_contextEncoder<span class="pl-kos">.</span><span class="pl-en">Emit</span><span class="pl-kos">(</span><span class="pl-c1">&amp;</span><span class="pl-s1">commandDraw</span><span class="pl-kos">)</span><span class="pl-kos">;</span> <span class="pl-c">// CommandType is inferred from the ICommand interface</span></pre></div>
+<div class="highlight highlight-source-cs"><pre><span class="pl-smi">void</span> <span class="pl-en">EmitVariable</span><span class="pl-c1">&lt;</span><span class="pl-c1">TCommand</span><span class="pl-kos">,</span> <span class="pl-c1">TVariable</span><span class="pl-c1">&gt;</span><span class="pl-kos">(</span><span class="pl-smi">TCommand<span class="pl-c1">*</span></span> <span class="pl-s1">pCommand</span><span class="pl-kos">,</span> <span class="pl-smi">TVariable<span class="pl-c1">*</span></span> <span class="pl-s1">pVariable</span><span class="pl-kos">,</span> <span class="pl-smi">uint</span> <span class="pl-s1">variableCount</span><span class="pl-kos">)</span> <span class="pl-k">where</span> <span class="pl-c1">TCommand</span> <span class="pl-c1">:</span> unmanaged<span class="pl-kos">,</span> <span class="pl-smi">ICommand</span> <span class="pl-k">where</span> <span class="pl-c1">TVariable</span> <span class="pl-c1">:</span> unmanaged<span class="pl-kos">;</span>
+<span class="pl-smi">void</span> <span class="pl-en">EmitVariable</span><span class="pl-c1">&lt;</span><span class="pl-c1">TCommand</span><span class="pl-kos">,</span> <span class="pl-c1">TVariable1</span><span class="pl-kos">,</span> <span class="pl-c1">TVariable2</span><span class="pl-c1">&gt;</span><span class="pl-kos">(</span><span class="pl-smi">TCommand<span class="pl-c1">*</span></span> <span class="pl-s1">pCommand</span><span class="pl-kos">,</span> <span class="pl-smi">TVariable1<span class="pl-c1">*</span></span> <span class="pl-s1">pVariable1</span><span class="pl-kos">,</span> <span class="pl-smi">TVariable2<span class="pl-c1">*</span></span> <span class="pl-s1">pVariable2</span><span class="pl-kos">,</span> <span class="pl-smi">uint</span> <span class="pl-s1">variableCount</span><span class="pl-kos">)</span> <span class="pl-k">where</span> <span class="pl-c1">TCommand</span> <span class="pl-c1">:</span> unmanaged<span class="pl-kos">,</span> <span class="pl-smi">ICommand</span> <span class="pl-k">where</span> <span class="pl-c1">TVariable1</span> <span class="pl-c1">:</span> unmanaged <span class="pl-k">where</span> <span class="pl-c1">TVariable2</span> <span class="pl-c1">:</span> unmanaged<span class="pl-kos">;</span></pre></div>
+<p>These methods allow you to emit variable-length commands, such as binding 32 bit constants to the pipeline:</p>
+<div class="highlight highlight-source-cs"><pre><span class="pl-smi"><span class="pl-smi">uint</span><span class="pl-c1">*</span></span> <span class="pl-s1">pConstants</span> <span class="pl-c1">=</span> <span class="pl-k">stackalloc</span> <span class="pl-smi">uint</span><span class="pl-kos">[</span><span class="pl-kos">]</span> <span class="pl-kos">{</span> <span class="pl-c1">1</span><span class="pl-kos">,</span> <span class="pl-c1">2</span><span class="pl-kos">,</span> <span class="pl-c1">3</span><span class="pl-kos">,</span> <span class="pl-kos">}</span><span class="pl-kos">;</span>
+
+<span class="pl-smi">var</span> <span class="pl-s1">command</span> <span class="pl-c1">=</span> <span class="pl-k">new</span> CommandBind32BitConstants
+<span class="pl-kos">{</span>
+    <span class="pl-s1">BindPoint</span> <span class="pl-c1">=</span> BindPoint<span class="pl-kos">.</span>Graphics<span class="pl-kos">,</span>
+    <span class="pl-s1">OffsetIn32BitValues</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span><span class="pl-kos">,</span>
+    <span class="pl-s1">ParameterIndex</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span><span class="pl-kos">,</span>
+    <span class="pl-s1">Num32BitValues</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>
+<span class="pl-kos">}</span><span class="pl-kos">;</span>
+
+_contextEncoder<span class="pl-kos">.</span><span class="pl-en">EmitVariable</span><span class="pl-kos">(</span><span class="pl-c1">&amp;</span><span class="pl-s1">command</span><span class="pl-kos">,</span> pConstants<span class="pl-kos">,</span> command<span class="pl-kos">.</span>Num32BitValues<span class="pl-kos">)</span><span class="pl-kos">;</span></pre></div>
+<h2><a id="user-content-decoding-a-command-buffer" class="anchor" aria-hidden="true" tabindex="-1" href="#decoding-a-command-buffer"><span aria-hidden="true" class="octicon octicon-link"></span></a>Decoding a command buffer</h2>
+<p>Decoding a command buffer is designed to be a simple serial iterative process (it is explicitly not designed for parallel decoding).
+The <code>ContextDecoder</code> type provides <code>AdvanceEmptyCommand</code>/<code>AdvanceCommand</code>/<code>AdvanceVariableCommand</code> which map to the above <code>Emit</code> methods, but advance the pointer instead of emitting anything.
+It is then simply a case of switching on the command type and emitting the appropriate native commands or validation. A command decoder is not permitted to modify the buffer, as the buffers are resubmittable, and the underlying memory is reused when reset.</p>
+<h2><a id="user-content-optimisations" class="anchor" aria-hidden="true" tabindex="-1" href="#optimisations"><span aria-hidden="true" class="octicon octicon-link"></span></a>Optimisations</h2>
+<p>This format allows a variety of optimisations to take place on the buffer format, including, but not limited to:</p>
+<ul>
+<li>Barrier merging/elimination</li>
+<li>Redundant state change elimination</li>
+<li>Minimal native command allocation</li>
+</ul>
+<p>The expected use of the serialisation is that a large set of buffers will be serialized at once (and it is likely they were recorded in parallel), in preperation for a single call to
+<code>ID3D12CommandQueue::ExecuteCommandLists</code> or <code>vkQueueSubmit</code> - so the buffers will have been recorded without knowledge of each other, but are submitted together. This allows us to perform optimisations
+the individual buffers can't. Exciting! 😃</p>
+<p>A key one is redundant state-change elimination. We can notice if calls to <code>SetPipeline</code>/<code>SetBlendFactor</code> etc don't actually change the set state across a command boundary (or within one, but
+that is less likely to occur), and simply not emit said calls to the native API.</p>
+<p>We can also merge and eliminate barriers. The Voltium barrier API is "closest" to the D3D12 one, where pipeline stages + image layouts are combined into the idea of a "resource state"
+(e.g, <code>PixelShaderResource</code> is the same image layout as <code>NonPixelShaderResource</code>, but a later stage of the pipeline). When we are given a set of barriers in a command buffer, or across a buffer,
+we can notice this (by using the <code>PeekCommand</code> methods) and attempt to merge the barriers by picking the minimum set from the barriers that achieves the consumer's desires.</p>
+<p>Normally, a decent amount of work goes into making sure your command allocators are running ideally, which consists of 2 approaches:</p>
+<ul>
+<li>Make sure they are "warmed-up" and not constantly re-allocating</li>
+<li>Make sure they are reused for similar sized passes/lists so they are as tightly sized as possible</li>
+</ul>
+<p>The virtual command buffer approach eliminates this, because only a single allocator is required and it only grows when a submission is larger than before (which also means it can be trivially reset).
+The actual buffer the virtual commands are recorded into uses managed GC memory from an <code>ArrayPool&lt;byte&gt;</code>.</p>
+<h2><a id="user-content-future-optimisations" class="anchor" aria-hidden="true" tabindex="-1" href="#future-optimisations"><span aria-hidden="true" class="octicon octicon-link"></span></a>Future optimisations</h2>
+<ul>
+<li>PGO</li>
+<li>Command reordering</li>
+<li>Work reodering</li>
+</ul>
+<p>PGO (Profiling guided optimisation) - by recording hueristics about various passes/lists (via things like decoder-inserted timing queries), we can make optimisation/submission decisions about them.</p>
+<p>Command reordering is switching around state settings/copies/draws/dispatches, and merging them, similar to how the GPU and driver naturally will due to the pipelined nature of a GPU, but with the additional information our decoder has. We can merge copies and transform barriers into split barriers, etc.</p>
+<p>Work reordering is a coarser-grained version of command reordering, which more closely relates to pass reordering/culling as done by our render graph. Currently it is not a primary goal of the virtual buffer decoder, but it could well be something to explore. We can create keys about each draw/dispatch based on state (pipeline, bound resources, etc) and sort via these keys (respecting dependencies) to minimise state thrashing on the GPU.</p>
+<h2><a id="user-content-other" class="anchor" aria-hidden="true" tabindex="-1" href="#other"><span aria-hidden="true" class="octicon octicon-link"></span></a>Other</h2>
+<p>Join the new Voltium discord! <a href="http://discord.voltium.org" rel="nofollow">http://discord.voltium.org</a></p>
+<p>Email me at <a href="mailto:johnkellyoxford@gmail.com">johnkellyoxford@gmail.com</a> or tweet at @johnkdev</p>

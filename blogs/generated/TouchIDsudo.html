@@ -1,0 +1,119 @@
+<h1><a id="user-content-using-touch-id-for-sudo" class="anchor" aria-hidden="true" tabindex="-1" href="#using-touch-id-for-sudo"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using Touch ID for <code>sudo</code>
+</h1>
+<p>macOS is really good at not making you use your login password. <em>Really</em> good. Keychain passwords, new device plugins, setting changes, all can be done
+via TouchID, which (particularly for those of us with lengthy passwords) is extremely useful.
+One place you can't by default use TouchID is for <code>sudo</code>, however it can be enabled manually.</p>
+<p><code>/etc/pam.d/sudo</code> is the file used to control the parameters needed to successfully use <code>sudo</code>.</p>
+<h3><a id="user-content-the-structure-of-etcpamdsudo" class="anchor" aria-hidden="true" tabindex="-1" href="#the-structure-of-etcpamdsudo"><span aria-hidden="true" class="octicon octicon-link"></span></a>The structure of <code>/etc/pam.d/sudo</code>
+</h3>
+<blockquote>
+<p><a href="#adding-touchid-support">You can skip this part if you only care about getting TouchID working</a></p>
+</blockquote>
+<p>The <code>/etc/pam.d/sudo</code> file is a type of PAM (Pluggable Authentication Module), which is used for granting and denying access to services.
+It is quite powerful, and here I will only cover the subset used by the <code>sudo</code> PAM. A more comprehensive guide to PAM syntax is covered <a href="https://linux.die.net/man/5/pam.d" rel="nofollow">on the man page</a>.</p>
+<p>This is how the file looks by default:</p>
+<pre><code># sudo: auth account password session
+auth       sufficient     pam_tid.so
+auth       sufficient     pam_smartcard.so
+auth       required       pam_opendirectory.so
+account    required       pam_permit.so
+password   required       pam_deny.so
+session    required       pam_permit.so
+</code></pre>
+<p>Comments begin with <code>#</code> in PAM files, and after that it consists of a series of tab-seperated 3-column rows with the following syntax:</p>
+<pre><code>service    type    control    module-path    module-arguments
+</code></pre>
+<p>Of course, this has 5 columns and the file above only ever uses 3.
+The <code>service</code> column is only used by the root <code>/etc/pam.conf</code> file, and for any <code>/etc/pam.d/&lt;SERVICE&gt;</code> file, <code>service</code> is implicit. For example, <code>service</code> is <code>sudo</code> in our file.
+The <code>module-arguments</code> column can be used, but none of the modules used here need any arguments, so it is ignored.</p>
+<p>The order of the file is significant, as it is processed line by line.</p>
+<h4><a id="user-content-type" class="anchor" aria-hidden="true" tabindex="-1" href="#type"><span aria-hidden="true" class="octicon octicon-link"></span></a>Type</h4>
+<p>There are 4 different types of management group, which is what this column represents:</p>
+<ul>
+<li>
+<p><code>account</code> - non-authentication based management</p>
+<ul>
+<li>Certains services may only be usable by certain roles. They could also be restricted by time of day, available system resources, or other arbitrary requirements.
+<code>account</code> is used for these type of modules which don't actually perform any authentication of the user themselves.</li>
+</ul>
+</li>
+<li>
+<p><code>auth</code> - the actual authentication modules</p>
+<ul>
+<li>These modules actual perform authentication of the user and grant credentials. Examples include password entry, TouchID, other biometrics, and things like OpenDirectory/LDAP.</li>
+</ul>
+</li>
+<li>
+<p><code>password</code> - these modules relate to changing passwords and aren't relevant to most services</p>
+</li>
+<li>
+<p><code>session</code> - modules related to session creation/destruction</p>
+</li>
+</ul>
+<h3><a id="user-content-control" class="anchor" aria-hidden="true" tabindex="-1" href="#control"><span aria-hidden="true" class="octicon octicon-link"></span></a>Control</h3>
+<p>There are 6 different control values, but we will only cover the 2 relevant to our PAM file, check the man page for others.</p>
+<ul>
+<li>
+<code>sufficient</code> - if a <code>sufficient</code> module succeeds, execution is stopped. If all previous <code>required</code> modules were successful, the auth was successful, else, if any <code>required</code> modules failed, the auth fails</li>
+<li>
+<code>required</code> - a <code>required</code> module will be executed, and its success recorded, and then execution continues. Failure of a <code>required</code> module means authentication will eventually fail, but it does not stop execution</li>
+</ul>
+<p>For example, let's show the execution flow for the following PAM file:</p>
+<p>(Note: the file doesn't really make sense as an actual PAM file, it is just a demo)</p>
+<pre><code>auth    required      pam_permit.so
+auth    required      pam_deny.so
+auth    sufficient    pam_deny.so
+auth    sufficient    pam_permit.so
+</code></pre>
+<blockquote>
+<p><code>pam_permit.so</code> always passes, and <code>pam_deny.so</code> always fails</p>
+</blockquote>
+<ul>
+<li>Line 1: <code>pam_permit.so</code> is <code>required</code>. It runs, and succeeds. Its exit status is remembered</li>
+<li>Line 2: <code>pam_deny.so</code> is <code>required</code>. It runs, and fails. Its exit status is remembered.</li>
+<li>Line 3: <code>pam_deny.so</code> is <code>sufficient</code>. It runs, fails, and so execution continues. The fact it failed is irrelevant and forgotten.</li>
+<li>Line 4: <code>pam_permit.so</code> is <code>sufficient</code>. It runs, passes, and so execution now stops (as a <code>sufficient</code> module succeeded).</li>
+</ul>
+<p>However, even though execution has stopped, a previous <code>required</code> module had failed. Therefore, authentication fails.</p>
+<h3><a id="user-content-module" class="anchor" aria-hidden="true" tabindex="-1" href="#module"><span aria-hidden="true" class="octicon octicon-link"></span></a>Module</h3>
+<p>The modules are relatively self-explanatory - these are the actual libraries used to authenticate. A few note worthy ones:</p>
+<ul>
+<li>
+<code>pam_permit.so</code> - always passes</li>
+<li>
+<code>pam_deny.so</code> - always fails</li>
+<li>
+<code>pam_tid.so</code> - the PAM for TouchID</li>
+<li>
+<code>pam_opendirectory.so</code> - the PAM for macOS OpenDirectory (this is what normally prompts you for a password)</li>
+</ul>
+<h2><a id="user-content-adding-touchid-support" class="anchor" aria-hidden="true" tabindex="-1" href="#adding-touchid-support"><span aria-hidden="true" class="octicon octicon-link"></span></a>Adding TouchID support</h2>
+<p>The line we need to add is as follows:</p>
+<pre><code>auth       sufficient     pam_tid.so
+</code></pre>
+<p>This line says to use the TouchID PAM module (<code>pam_tid.so</code>) as an authentication module, and consider it passing sufficient authentication.
+We want to insert it at the <em>top</em> of the module, so it runs before <code>pam_opendirectory.so</code>, which will prompt for a password.</p>
+<p>Note that as this is a system file, it is restricted, and editing it will require <code>sudo</code>.</p>
+<p>This unfortunately gets removed every OS update, so I put a little script to add it in a ZSH plugin (<code>$ZSH_CUSTOM/plugins/touchid-auth/touchid-auth.plugin.zsh</code>) and then add that to my <code>~/.zshrc</code> plugin list.</p>
+<div class="highlight highlight-source-shell"><pre><span class="pl-c"><span class="pl-c">#</span> add line if not currently present in file</span>
+grep -qx <span class="pl-s"><span class="pl-pds">'</span>auth\s*sufficient\s*pam_tid\.so<span class="pl-pds">'</span></span> /etc/pam.d/sudo <span class="pl-k">||</span> {
+  tmp=<span class="pl-s"><span class="pl-pds">$(</span>mktemp<span class="pl-pds">)</span></span>
+
+  <span class="pl-c"><span class="pl-c">#</span> Take the first line (the comment line) from the auth file</span>
+  head -1 /etc/pam.d/sudo <span class="pl-k">&gt;&gt;</span> <span class="pl-smi">$tmp</span>
+
+  <span class="pl-c"><span class="pl-c">#</span> Insert our line as the first real line of the file - this ensures TouchID is tried _before_ password</span>
+  print <span class="pl-s"><span class="pl-pds">'</span>auth       sufficient     pam_tid.so<span class="pl-pds">'</span></span> <span class="pl-k">&gt;&gt;</span> <span class="pl-smi">$tmp</span>
+
+  <span class="pl-c"><span class="pl-c">#</span> Copy the rest of the file</span>
+  tail -n +2 /etc/pam.d/sudo <span class="pl-k">&gt;&gt;</span> <span class="pl-smi">$tmp</span>
+
+  <span class="pl-c"><span class="pl-c">#</span> Save to the auth file</span>
+  prompt=<span class="pl-s"><span class="pl-pds">'</span>Trying to enable TouchID for `sudo` but command does not have `sudo` access - enter password to continue: <span class="pl-pds">'</span></span>
+  sudo -p <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$prompt</span><span class="pl-pds">"</span></span> cp /etc/pam.d/sudo /etc/pam.d/sudo.bak
+  sudo -p <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$prompt</span><span class="pl-pds">"</span></span> mv <span class="pl-smi">$tmp</span> /etc/pam.d/sudo
+
+  print <span class="pl-s"><span class="pl-pds">'</span>TouchID enabled for `sudo` - old `sudo` auth file backed up to /etc/pam.d/sudo.bak<span class="pl-pds">'</span></span>
+
+  <span class="pl-c"><span class="pl-c">#</span> No need to remove the temp file because we moved it</span>
+}</pre></div>

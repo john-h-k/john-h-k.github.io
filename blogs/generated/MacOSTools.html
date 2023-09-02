@@ -1,0 +1,11 @@
+<h1><a id="user-content-install-gnu-tools-for-macos" class="anchor" aria-hidden="true" tabindex="-1" href="#install-gnu-tools-for-macos"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install GNU tools for macOS</h1>
+<p>By default, macOS has FreeBSD-based core utilities such as <code>date</code>, <code>grep</code>, and <code>sed</code>. While these are adequate for many tasks, they're very limited in comparison to the GNU standard utilites that you may be used to from bash, and that are often used in stackoverflow bash scripts and the like. To install the improved GNU-standard tools, run these Homebrew commands.</p>
+<div class="highlight highlight-source-shell"><pre>brew install coreutils <span class="pl-c"><span class="pl-c">#</span> The majority of them</span>
+brew install findutils <span class="pl-c"><span class="pl-c">#</span> find</span>
+brew install gnu-indent <span class="pl-c"><span class="pl-c">#</span> indent</span>
+brew install gnu-sed <span class="pl-c"><span class="pl-c">#</span> sed</span>
+brew install gnutls <span class="pl-c"><span class="pl-c">#</span> TLS</span>
+brew install grep <span class="pl-c"><span class="pl-c">#</span> grep</span>
+brew install gnu-tar <span class="pl-c"><span class="pl-c">#</span> tar</span>
+brew install gawk <span class="pl-c"><span class="pl-c">#</span> [g]awk</span></pre></div>
+<p>However, to prevent breaking the large number of tools expecting FreeBSD utilities, all of these will be installed with a <code>g</code> prefix. So now you can use <code>ggrep</code>, <code>gdate</code>, and <code>gsed</code> to your heart's content without any of the limits of the Free-BSD versions!</p>
