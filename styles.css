@@ -73,3 +73,11 @@ footer {
   padding: 2px 4px;
   font-size: 90%;
 }
+
+.highlight {
+  background-color: #f8f9fa;  /* Light gray background */
+  border: 1px solid #ccc;      /* Border */
+  padding: 10px;               /* Padding */
+  margin: 10px 0;              /* Margin */
+  overflow-x: auto;            /* Scroll bar if the code is wide */
+}
