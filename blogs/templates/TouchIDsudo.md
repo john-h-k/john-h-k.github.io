@@ -105,7 +105,7 @@ Note that as this is a system file, it is restricted, and editing it will requir
 This unfortunately gets removed every OS update, so I put a little script to add it in a ZSH plugin (`$ZSH_CUSTOM/plugins/touchid-auth/touchid-auth.plugin.zsh`) and then add that to my `~/.zshrc` plugin list.
 
 
-```sh
+```bash
 # add line if not currently present in file
 grep -qx 'auth\s*sufficient\s*pam_tid\.so' /etc/pam.d/sudo || {
   tmp=$(mktemp)
