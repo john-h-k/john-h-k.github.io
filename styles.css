@@ -23,6 +23,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 20px;
+  padding-bottom: 2em;
 }
 
 .footer-button {
@@ -68,13 +69,28 @@ article {
   border: 1px solid #ccc;
 }
 
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+}
+
 /* Style the footer */
 footer {
+  flex-shrink: 0;
   background-color: #fff;
   color: #333;
   text-align: center;
   padding: 1rem;
   border-top: 1px solid #ccc;
+}
+
+li {
+  margin: 0.3rem 0;
 }
 
 /* Table of contents styling */
@@ -121,7 +137,8 @@ div.highlight pre, pre code {
   border-radius: 3px;
 }
 
-div code, p code, span code, li code, ul code {
+/* Makes inline code a bit clearer */
+div code, p code, span code, li code, ul code, h1 code, h2 code, h3 code, h4 code, h5 code, h6 code {
   font-size: 1.2em;
   padding: 0.1em 0.2em;
   background-color: #f4f4f4;

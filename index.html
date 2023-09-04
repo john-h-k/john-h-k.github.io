@@ -7,49 +7,52 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+  <div class="page-container">
+    <header>
+      <h1>John's Blog</h1>
+    </header>
 
-  <header>
-    <h1>John's Blog</h1>
-  </header>
+    <div class="content">
+      <main>
+        <!-- Add this to the main section of your blog -->
+        <section id="toc" class="toc-container">
+          <h2>Articles</h2>
+          <ul class="toc-list">
+            <li><a href="blogs/generated/touch-id-sudo.html">Use TouchID for <code>sudo</code></a></li>
+            <li><a href="blogs/generated/mac-os-tools.html">Better macOS tools</a></li>
+            <li><a href="blogs/generated/sql-aggregate.html">SQL Aggregation for beginners</a></li>
+            <li><a href="blogs/generated/vex-transition-penalties.html">AVX -> SSE transition penalties, VEX encoding, and why they matter</a></li>
+            <li><a href="blogs/generated/command-buffer.html">Creating a new command buffer system for Voltium</a></li>
+            <li><a href="blogs/generated/learn-dx12/Nano-COM.html">[Learn DirectX12] Nano-COM</a></li>
+          </ul>
+        </section>
+      </main>
+    </div
 
-  <main>
-    <!-- Add this to the main section of your blog -->
-    <section id="toc" class="toc-container">
-      <h2>Articles</h2>
-      <ul class="toc-list">
-        <li><a href="blogs/generated/touch-id-sudo.html">Use TouchID for <code>sudo</code></a></li>
-        <li><a href="blogs/generated/mac-os-tools.html">Better macOS tools</a></li>
-        <li><a href="blogs/generated/sql-aggregate.html">SQL Aggregation for beginners</a></li>
-        <li><a href="blogs/generated/vex-transition-penalties.html">AVX -> SSE transition penalties, VEX encoding, and why they matter</a></li>
-        <li><a href="blogs/generated/command-buffer.html">Creating a new command buffer system for Voltium</a></li>
-        <li><a href="blogs/generated/learn-dx12/Nano-COM.html">[Learn DirectX12] Nano-COM</a></li>
-      </ul>
-    </section>
-  </main>
-
-  <footer>
-    <div class="footer-container">
-      <div class="footer-button">
-        <a href="https://twitter.com/johnkdev" target="_blank">
-          <i class="fab fa-twitter"></i> johnkdev
-        </a>
+    <footer>
+      <div class="footer-container">
+        <div class="footer-button">
+          <a href="https://twitter.com/johnkdev" target="_blank">
+            <i class="fab fa-twitter"></i> johnkdev
+          </a>
+        </div>
+        <div class="footer-button">
+          <a href="https://github.com/john-h-k" target="_blank">
+            <i class="fab fa-github"></i> john-h-k
+          </a>
+        </div>
+        <div class="footer-button">
+          <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
+            <i class="fab fa-linkedin"></i> John Kelly
+          </a>
+        </div>
+        <div class="footer-button">
+          <a href="mailto:johnharrykelly@gmail.com" target="_blank">
+            <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
+          </a>
+        </div>
       </div>
-      <div class="footer-button">
-        <a href="https://github.com/john-h-k" target="_blank">
-          <i class="fab fa-github"></i> john-h-k
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
-          <i class="fab fa-linkedin"></i> John Kelly
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="mailto:johnharrykelly@gmail.com" target="_blank">
-          <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
-        </a>
-      </div>
-    </div>
-  </footer>
+    </footer>
+  </div>
 </body>
 </html>

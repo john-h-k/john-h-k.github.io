@@ -26,6 +26,16 @@
     });
 
     hljs.highlightAll();
+
+    // For any element like "<h1>Foo bar baz<h1>", give it an id of 'foo-bar-baz' so relative links work
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((element) => {
+        let title = element.textContent
+        let id = title.toLowerCase().replaceAll(" ", "-")
+        element.id = id
+      });
+    });
+    
   </script>
 </head>
 <body>
