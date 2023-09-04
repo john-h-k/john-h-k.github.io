@@ -8,34 +8,67 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/x86asm.min.js"></script>
   <script defer>
     // GitHub markdown API quirk - when you use `bash` syntax highlighting it generates `shell`.
     // `highlight.js` shell highlighting is awful, so change it to bash
     document.addEventListener('DOMContentLoaded', (event) => {
       document.querySelectorAll('.highlight-source-shell').forEach((element) => {
-        element.classList.remove('highlight-source-shell');
-        element.classList.add('highlight-source-bash');
+        element.classList.remove('highlight-source-shell')
+        element.classList.add('highlight-source-bash')
       });
-    });
+
+      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
+      // so we transform it to `<pre><code>`
+      document.querySelectorAll('div.highlight pre').forEach((element) => {
+        const langClass = Array.from(element.parentElement.classList).find(className => className.startsWith('highlight-source-'))
+
+        const codeElement = document.createElement('code')
+        codeElement.classList.add("notranslate")
+        codeElement.innerHTML = element.innerText // use `innerText` not `innerHTML` to strip tags
+        
+        if (langClass) {
+          codeElement.classList.add(langClass)
+        }
+
+        element.replaceWith(codeElement)
+
+        const preElement = document.createElement('pre')
+        codeElement.classList.add("notranslate")
+        preElement.innerHTML = codeElement.parentElement.innerHTML
+
+        if (langClass) {
+          const langName = langClass.split("-")[2]
+          preElement.lang = langName
+        }
+        
+        codeElement.parentElement.replaceWith(preElement)
+      })
+
+      // Use the `lang` attribute of `pre`
+      document.querySelectorAll('pre code').forEach((element) => {
+        if (element.parentElement.lang) {
+          const langClass = `highlight-source-${element.parentElement.lang}`
+
+          element.classList.add(langClass)
+        }
+      })
+      
+      // For any element like "<h1>Foo bar baz<h1>", give it an id of 'foo-bar-baz' so relative links work
+      document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((element) => {
+        let title = element.textContent
+        let id = title.toLowerCase().replaceAll(" ", "-")
+        element.id = id
+      })
+    })
 
     hljs.configure({
-      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
-      cssSelector: 'div.highlight pre, pre code',
+      cssSelector: 'pre code',
       // The GitHub markdown API generates `highlight-source-<LANG>`
       languageDetectRe: /\bhighlight-source-([\w-]+)\b/i,
     });
 
     hljs.highlightAll();
-
-    // For any element like "<h1>Foo bar baz<h1>", give it an id of 'foo-bar-baz' so relative links work
-    document.addEventListener('DOMContentLoaded', (event) => {
-      document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((element) => {
-        let title = element.textContent
-        let id = title.toLowerCase().replaceAll(" ", "-")
-        element.id = id
-      });
-    });
-    
   </script>
 </head>
 <body>

@@ -129,16 +129,16 @@ li {
   color: #0056b3;
 }
 
+code {
+  background-color: #f8f9fa !important;  /* Light gray background */  
+}
 
-div.highlight pre, pre code {
-  background-color: #f8f9fa;  /* Light gray background */
+pre {
   border: 1px solid #ccc;      /* Border */
-  margin: 20px 0;              /* Margin */
   overflow-x: auto;            /* Scroll bar if the code is wide */
+  background-color: #f8f9fa;  /* Light gray background */
 
   font-size: 1.2em;
-  padding: 1em;
-  background-color: #f4f4f4;
   border-radius: 3px;
 }
 
