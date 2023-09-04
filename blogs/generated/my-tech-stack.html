@@ -35,7 +35,6 @@
 
   <main>
     <article id="article-id" class="blog-article">
-<h1>Detailed Analysis of C# <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> Types: Inefficiencies and Hazards</h1>
 <p>Let's talk about the <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> types. These types were introduced in C# 7.2 and are used to represent contiguous regions of memory. They are similar to <code class="notranslate">Span&lt;T&gt;</code> and <code class="notranslate">ReadOnlySpan&lt;T&gt;</code>, but designed to be heap-safe for use in asynchronous code.</p>
 <p>Yet, a careful examination of these types uncovers various inefficiencies and potential hazards. Today, we will highlight and discuss three main issues:</p>
 <ol>

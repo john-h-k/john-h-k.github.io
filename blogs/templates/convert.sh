@@ -20,7 +20,7 @@ for file in $(fd . "$template_dir" --extension md); do
   
   echo -e "Processing '$full_name' into '$output_name'\n"
 
-  jq --slurp --raw-input  '{"text": "\(.)", "mode": "gfm"}' < "$file" \
+  tail -n +2 < "$file" | jq --slurp --raw-input  '{"text": "\(.)", "mode": "gfm"}'\
     | gh api \
         --method POST \
         -H "Accept: application/vnd.github+json" \

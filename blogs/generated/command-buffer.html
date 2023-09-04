@@ -35,7 +35,6 @@
 
   <main>
     <article id="article-id" class="blog-article">
-<h1>Creating a new command buffer system for Voltium</h1>
 <p>While writing the Vulkan backend for Voltium, and absent mindedly pondering the OpenGLES backend that will be inevitable for mobile support,<br>
 I started to cringe at how crinkly and fragile the current (preprocessor-based) backend system was. I realised that for maintenance reasons, decoupling the API agnostic frontend<br>
 and the API specific backend is essential. However, performance is still as much of a priority as ever, and any move away from this must justify its design by enabling new optimisations<br>

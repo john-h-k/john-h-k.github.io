@@ -35,7 +35,6 @@
 
   <main>
     <article id="article-id" class="blog-article">
-<h1>AVX -&gt; SSE transition penalties, VEX encoding, and why they matter</h1>
 <p>You might have heard of AVX to SSE transition penalties, or VEX encoding, or seen some assembly with a lot of "v"s in front of instructions and been mildly confused by it. Hopefully, this post can help clear these concepts up - what they are, why they matter to you (or don't, hopefully), and why they are significant.</p>
 <p>My twitter: <a href="https://twitter.com/johnkdev" rel="nofollow">https://twitter.com/johnkdev</a></p>
 <p>My github: <a href="https://github.com/john-h-k">https://github.com/john-h-k</a></p>
@@ -115,7 +114,7 @@ Asm<span class="pl-kos">.</span><span class="pl-en">RestoreRegisters</span><span
 BigAvxMethod2<span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">;</span> <span class="pl-c">// Only AVX instrs</span></pre></div>
 <p>In reality, your compiler will handle appropriate zeroing and preserving of registers - however, this knowledge is useful for trying to minimise cases where these transitions occur.</p>
 <h2>XSAVE and XRSTOR and their relation to preserving upper vector states</h2>
-<p>This section assumes you know what <code class="notranslate">xsave</code> and <code class="notranslate">xrstor</code> are. If not, see Volume 1 Chapter 13 of the (Intel Developer Manuals](<a href="https://software.intel.com/en-us/articles/intel-sdm" rel="nofollow">https://software.intel.com/en-us/articles/intel-sdm</a>).</p>
+<p>This section assumes you know what <code class="notranslate">xsave</code> and <code class="notranslate">xrstor</code> are. If not, see Volume 1 Chapter 13 of the <a href="https://software.intel.com/en-us/articles/intel-sdm" rel="nofollow">Intel Developer Manuals</a>.</p>
 <p>Pre skylake, if you had a clean upper state, saving state, followed by restoring state, results in a clean upper state. Saving with a dirty upper state, and then restoring, results in entering a preserved upper state, and entering this state invokes a one time short penalty during restore, which will become dirty if a VEX encoded instruction is executed, or cleaned by a <code class="notranslate">vzeroupper/vzeroall</code>. Restoring state with AVX state initialized (zeroed) enters a clean state, although if it is from a dirty image or preserved upper state, it invokes a penalty.</p>
 <p><a target="_blank" rel="noopener noreferrer" href="/assets/Intel_PreSkylake_Transitions.png"><img src="/assets/Intel_PreSkylake_Transitions.png" alt="Intel_PreSkylake_Transitions" style="max-width: 100%;"></a></p>
 <p>Post skylake, restoring a saved dirty state involves a short penalty, even when no non VEX instructions are executed, and returns to a dirty upper state. Restoring a clean image or restoring with AVX initialized has no penalty and returns to a clean state.</p>
