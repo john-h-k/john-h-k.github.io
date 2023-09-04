@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DirectDrawSurface (DDS) files</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script defer>
+    // GitHub markdown API quirk - when you use `bash` syntax highlighting it generates `shell`.
+    // `highlight.js` shell highlighting is awful, so change it to bash
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('.highlight-source-shell').forEach((element) => {
+        element.classList.remove('highlight-source-shell');
+        element.classList.add('highlight-source-bash');
+      });
+    });
+
+    hljs.configure({
+      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
+      cssSelector: 'div.highlight pre, pre code',
+      // The GitHub markdown API generates `highlight-source-<LANG>`
+      languageDetectRe: /\bhighlight-source-([\w-]+)\b/i,
+    });
+
+    hljs.highlightAll();
+  </script>
+</head>
+<body>
+
+  <header>
+    <h1>DirectDrawSurface (DDS) files</h1>
+  </header>
+
+  <main>
+    <article id="article-id" class="blog-article">
+<h1>DirectDrawSurface (DDS) files</h1>
+<p>DDS (DirectDrawSurface) files are a common texture format, which are really well suited to GPUs and support pretty much everything you could want in a texture. Unfortunately, the documentation for them is very lacking, and you have to piece it together from the various open-source DDS loaders across the internet. I wrote this to try and put that info in one nice neat place.</p>
+<h2>Metadata</h2>
+<p>All data is little-endian.</p>
+<p>The very first element in a DDS file is a 4 byte magic number - <code class="notranslate">0x20534444</code> in hex, <code class="notranslate">542327876</code> in decimal, which is the ASCII string <code class="notranslate">"DDS "</code>. That is a space (ASCII value 32), not a null char at the end.</p>
+<p>After this, there is the DDS file header. The structure looks like this (<code class="notranslate">uint</code> is a 32 bit little endian unsigned integer):</p>
+<div class="highlight highlight-source-cs"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">DDSHeader</span>
+<span class="pl-kos">{</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Size</span><span class="pl-kos">;</span>
+    <span class="pl-smi">HeaderFlags</span> <span class="pl-s1">Flags</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Height</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Width</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">PitchOrLinearSize</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Depth</span><span class="pl-kos">;</span> <span class="pl-c">// only if DDS_HEADER_FLAGS_VOLUME is set in flags</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">MipMapCount</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Reserved1</span><span class="pl-kos">[</span><span class="pl-c1">11</span><span class="pl-kos">]</span><span class="pl-kos">;</span>
+    <span class="pl-smi">DDSPixelFormat</span> <span class="pl-s1">DdsPixelFormat</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Caps</span><span class="pl-kos">;</span>
+    <span class="pl-smi">Caps2Flags</span> <span class="pl-s1">Caps2</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Caps3</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Caps4</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Reserved2</span><span class="pl-kos">;</span>
+<span class="pl-kos">}</span></pre></div>
+<p><code class="notranslate">HeaderFlags</code> and <code class="notranslate">Caps2Flags</code> are enums defined as such:</p>
+<div class="highlight highlight-source-cs"><pre class="notranslate"><span class="pl-k">enum</span> <span class="pl-smi">HeaderFlags</span> <span class="pl-c1">:</span> <span class="pl-smi">uint</span>
+<span class="pl-kos">{</span>
+    <span class="pl-c1">DDS_CAPS</span> <span class="pl-c1">=</span> <span class="pl-c1">0x1</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_HEIGHT</span> <span class="pl-c1">=</span> <span class="pl-c1">0x2</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_WIDTH</span> <span class="pl-c1">=</span> <span class="pl-c1">0x4</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_PITCH</span> <span class="pl-c1">=</span> <span class="pl-c1">0x8</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_PIXELFORMAT</span> <span class="pl-c1">=</span> <span class="pl-c1">0x1000</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_MIPMAPCOUNT</span> <span class="pl-c1">=</span> <span class="pl-c1">0x20000</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_LINEARSIZE</span> <span class="pl-c1">=</span> <span class="pl-c1">0x80000</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_DEPTH</span> <span class="pl-c1">=</span> <span class="pl-c1">0x800000</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_HEADER_FLAGS_VOLUME</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00800000</span><span class="pl-kos">,</span>
+<span class="pl-kos">}</span>
+
+<span class="pl-k">enum</span> <span class="pl-smi">Caps2Flags</span> <span class="pl-c1">:</span> <span class="pl-smi">uint</span>
+<span class="pl-kos">{</span>
+    <span class="pl-c1">DDS_CUBEMAP_POSITIVEX</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00000600</span><span class="pl-kos">,</span> <span class="pl-c">// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEX</span>
+    <span class="pl-c1">DDS_CUBEMAP_NEGATIVEX</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00000a00</span><span class="pl-kos">,</span> <span class="pl-c">// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEX</span>
+    <span class="pl-c1">DDS_CUBEMAP_POSITIVEY</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00001200</span><span class="pl-kos">,</span> <span class="pl-c">// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEY</span>
+    <span class="pl-c1">DDS_CUBEMAP_NEGATIVEY</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00002200</span><span class="pl-kos">,</span> <span class="pl-c">// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEY</span>
+    <span class="pl-c1">DDS_CUBEMAP_POSITIVEZ</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00004200</span><span class="pl-kos">,</span> <span class="pl-c">// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEZ</span>
+    <span class="pl-c1">DDS_CUBEMAP_NEGATIVEZ</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00008200</span><span class="pl-kos">,</span> <span class="pl-c">// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEZ</span>
+
+    <span class="pl-c1">DDS_CUBEMAP_ALLFACES</span> <span class="pl-c1">=</span> <span class="pl-s1">DDS_CUBEMAP_POSITIVEX</span> <span class="pl-c1">|</span> <span class="pl-s1">DDS_CUBEMAP_NEGATIVEX</span> <span class="pl-c1">|</span>
+                            <span class="pl-s1">DDS_CUBEMAP_POSITIVEY</span> <span class="pl-c1">|</span> <span class="pl-s1">DDS_CUBEMAP_NEGATIVEY</span> <span class="pl-c1">|</span>
+                            <span class="pl-s1">DDS_CUBEMAP_POSITIVEZ</span> <span class="pl-c1">|</span> <span class="pl-s1">DDS_CUBEMAP_NEGATIVEZ</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_CUBEMAP</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00000200</span>
+<span class="pl-kos">}</span></pre></div>
+<p><code class="notranslate">DDSPixelFormat</code> is another struct, which describes the format of the pixels (wow what a suprise!). <code class="notranslate">PixelFormatFlags</code> is just another enum, and then <code class="notranslate">D3DFormat</code> is a hellish <code class="notranslate">uint</code> enum that represents legacy <code class="notranslate">D3DX</code> format types. For any modern usage, you have to translate these into <code class="notranslate">DXGI_FORMAT</code> types</p>
+<div class="highlight highlight-source-cs"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">DDSPixelFormat</span>
+<span class="pl-kos">{</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">Size</span><span class="pl-kos">;</span>
+    <span class="pl-smi">PixelFormatFlags</span> <span class="pl-s1">Flags</span><span class="pl-kos">;</span>
+    <span class="pl-smi">D3DFormat</span> <span class="pl-s1">FourCC</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">RgbBitCount</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">RBitMask</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">GBitMask</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">BBitMask</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">ABitMask</span><span class="pl-kos">;</span>
+<span class="pl-kos">}</span>
+
+<span class="pl-k">enum</span> <span class="pl-smi">PixelFormatFlags</span> <span class="pl-c1">:</span> <span class="pl-smi">uint</span>
+<span class="pl-kos">{</span>
+    <span class="pl-c1">DDS_FOURCC</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00000004</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_RGB</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00000040</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_LUMINANCE</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00020000</span><span class="pl-kos">,</span>
+    <span class="pl-c1">DDS_ALPHA</span> <span class="pl-c1">=</span> <span class="pl-c1">0x00000002</span>
+<span class="pl-kos">}</span>
+
+<span class="pl-k">enum</span> <span class="pl-smi">D3DFormat</span> <span class="pl-c1">:</span> <span class="pl-smi">uint</span>
+<span class="pl-kos">{</span>
+    <span class="pl-c1">D3DFMT_UNKNOWN</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_R8G8B8</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A8R8G8B8</span> <span class="pl-c1">=</span> <span class="pl-c1">21</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_X8R8G8B8</span> <span class="pl-c1">=</span> <span class="pl-c1">22</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_R5G6B5</span> <span class="pl-c1">=</span> <span class="pl-c1">23</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_X1R5G5B5</span> <span class="pl-c1">=</span> <span class="pl-c1">24</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A1R5G5B5</span> <span class="pl-c1">=</span> <span class="pl-c1">25</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A4R4G4B4</span> <span class="pl-c1">=</span> <span class="pl-c1">26</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_R3G3B2</span> <span class="pl-c1">=</span> <span class="pl-c1">27</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A8</span> <span class="pl-c1">=</span> <span class="pl-c1">28</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A8R3G3B2</span> <span class="pl-c1">=</span> <span class="pl-c1">29</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_X4R4G4B4</span> <span class="pl-c1">=</span> <span class="pl-c1">30</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A2B10G10R10</span> <span class="pl-c1">=</span> <span class="pl-c1">31</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A8B8G8R8</span> <span class="pl-c1">=</span> <span class="pl-c1">32</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_X8B8G8R8</span> <span class="pl-c1">=</span> <span class="pl-c1">33</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_G16R16</span> <span class="pl-c1">=</span> <span class="pl-c1">34</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A2R10G10B10</span> <span class="pl-c1">=</span> <span class="pl-c1">35</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A16B16G16R16</span> <span class="pl-c1">=</span> <span class="pl-c1">36</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_A8P8</span> <span class="pl-c1">=</span> <span class="pl-c1">40</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_P8</span> <span class="pl-c1">=</span> <span class="pl-c1">41</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_L8</span> <span class="pl-c1">=</span> <span class="pl-c1">50</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A8L8</span> <span class="pl-c1">=</span> <span class="pl-c1">51</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A4L4</span> <span class="pl-c1">=</span> <span class="pl-c1">52</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_V8U8</span> <span class="pl-c1">=</span> <span class="pl-c1">60</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_L6V5U5</span> <span class="pl-c1">=</span> <span class="pl-c1">61</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_X8L8V8U8</span> <span class="pl-c1">=</span> <span class="pl-c1">62</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_Q8W8V8U8</span> <span class="pl-c1">=</span> <span class="pl-c1">63</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_V16U16</span> <span class="pl-c1">=</span> <span class="pl-c1">64</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A2W10V10U10</span> <span class="pl-c1">=</span> <span class="pl-c1">67</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_UYVY</span> <span class="pl-c1">=</span> <span class="pl-c1">1498831189</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('U', 'Y', 'V', 'Y'),</span>
+    <span class="pl-c1">D3DFMT_R8G8_B8G8</span> <span class="pl-c1">=</span> <span class="pl-c1">1195525970</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('R', 'G', 'B', 'G'),</span>
+    <span class="pl-c1">D3DFMT_YUY2</span> <span class="pl-c1">=</span> <span class="pl-c1">844715353</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('Y', 'U', 'Y', '2'),</span>
+    <span class="pl-c1">D3DFMT_G8R8_G8B8</span> <span class="pl-c1">=</span> <span class="pl-c1">1111970375</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('G', 'R', 'G', 'B'),</span>
+    <span class="pl-c1">D3DFMT_DXT1</span> <span class="pl-c1">=</span> <span class="pl-c1">827611204</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('D', 'X', 'T', '1'),</span>
+    <span class="pl-c1">D3DFMT_DXT2</span> <span class="pl-c1">=</span> <span class="pl-c1">844388420</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('D', 'X', 'T', '2'),</span>
+    <span class="pl-c1">D3DFMT_DXT3</span> <span class="pl-c1">=</span> <span class="pl-c1">861165636</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('D', 'X', 'T', '3'),</span>
+    <span class="pl-c1">D3DFMT_DXT4</span> <span class="pl-c1">=</span> <span class="pl-c1">877942852</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('D', 'X', 'T', '4'),</span>
+    <span class="pl-c1">D3DFMT_DXT5</span> <span class="pl-c1">=</span> <span class="pl-c1">894720068</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('D', 'X', 'T', '5'),</span>
+
+    <span class="pl-c1">D3DFMT_D16_LOCKABLE</span> <span class="pl-c1">=</span> <span class="pl-c1">70</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_D32</span> <span class="pl-c1">=</span> <span class="pl-c1">71</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_D15S1</span> <span class="pl-c1">=</span> <span class="pl-c1">73</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_D24S8</span> <span class="pl-c1">=</span> <span class="pl-c1">75</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_D24X8</span> <span class="pl-c1">=</span> <span class="pl-c1">77</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_D24X4S4</span> <span class="pl-c1">=</span> <span class="pl-c1">79</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_D16</span> <span class="pl-c1">=</span> <span class="pl-c1">80</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_D32F_LOCKABLE</span> <span class="pl-c1">=</span> <span class="pl-c1">82</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_D24FS8</span> <span class="pl-c1">=</span> <span class="pl-c1">83</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_D32_LOCKABLE</span> <span class="pl-c1">=</span> <span class="pl-c1">84</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_S8_LOCKABLE</span> <span class="pl-c1">=</span> <span class="pl-c1">85</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_L16</span> <span class="pl-c1">=</span> <span class="pl-c1">81</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_VERTEXDATA</span> <span class="pl-c1">=</span> <span class="pl-c1">100</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_INDEX16</span> <span class="pl-c1">=</span> <span class="pl-c1">101</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_INDEX32</span> <span class="pl-c1">=</span> <span class="pl-c1">102</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_Q16W16V16U16</span> <span class="pl-c1">=</span> <span class="pl-c1">110</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_MULTI2_ARGB8</span> <span class="pl-c1">=</span> <span class="pl-c1">827606349</span><span class="pl-kos">,</span> <span class="pl-c">// MAKEFOURCC('M','E','T','1'),</span>
+
+    <span class="pl-c1">D3DFMT_R16F</span> <span class="pl-c1">=</span> <span class="pl-c1">111</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_G16R16F</span> <span class="pl-c1">=</span> <span class="pl-c1">112</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A16B16G16R16F</span> <span class="pl-c1">=</span> <span class="pl-c1">113</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_R32F</span> <span class="pl-c1">=</span> <span class="pl-c1">114</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_G32R32F</span> <span class="pl-c1">=</span> <span class="pl-c1">115</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A32B32G32R32F</span> <span class="pl-c1">=</span> <span class="pl-c1">116</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_CxV8U8</span> <span class="pl-c1">=</span> <span class="pl-c1">117</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_A1</span> <span class="pl-c1">=</span> <span class="pl-c1">118</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_A2B10G10R10_XR_BIAS</span> <span class="pl-c1">=</span> <span class="pl-c1">119</span><span class="pl-kos">,</span>
+    <span class="pl-c1">D3DFMT_BINARYBUFFER</span> <span class="pl-c1">=</span> <span class="pl-c1">199</span><span class="pl-kos">,</span>
+
+    <span class="pl-c1">D3DFMT_FORCE_DWORD</span> <span class="pl-c1">=</span> <span class="pl-c1">0x7fffffff</span>
+<span class="pl-kos">}</span></pre></div>
+<p>If <code class="notranslate">header.DdsPixelFormat.Flags</code> has the <code class="notranslate">DDS_FOURCC</code> flag set, and the <code class="notranslate">header.DdsPixelFormat.FourCC</code> value is <code class="notranslate">'DX10'</code>, then the DDS 10 header is also present directly afterwards.</p>
+<div class="highlight highlight-source-cs"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">DDSHeaderDxt10</span>
+<span class="pl-kos">{</span>
+    <span class="pl-smi">DXGI_FORMAT</span> <span class="pl-s1">DxgiFormat</span><span class="pl-kos">;</span>
+    <span class="pl-smi">D3D11_RESOURCE_DIMENSION</span> <span class="pl-s1">ResourceDimension</span><span class="pl-kos">;</span>
+    <span class="pl-smi">D3D11_RESOURCE_MISC_FLAG</span> <span class="pl-s1">MiscFlag</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">ArraySize</span><span class="pl-kos">;</span>
+    <span class="pl-smi">uint</span> <span class="pl-s1">MiscFlags2</span><span class="pl-kos">;</span>
+<span class="pl-kos">}</span></pre></div>    </article>
+  </main>
+
+  <footer>
+    <p>''</p>
+  </footer>
+
+</body>
+</html>

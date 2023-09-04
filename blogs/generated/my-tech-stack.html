@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Detailed Analysis of C# `Memory<T>` and `ReadOnlyMemory<T>` Types: Inefficiencies and Hazards</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script defer>
+    // GitHub markdown API quirk - when you use `bash` syntax highlighting it generates `shell`.
+    // `highlight.js` shell highlighting is awful, so change it to bash
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('.highlight-source-shell').forEach((element) => {
+        element.classList.remove('highlight-source-shell');
+        element.classList.add('highlight-source-bash');
+      });
+    });
+
+    hljs.configure({
+      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
+      cssSelector: 'div.highlight pre, pre code',
+      // The GitHub markdown API generates `highlight-source-<LANG>`
+      languageDetectRe: /\bhighlight-source-([\w-]+)\b/i,
+    });
+
+    hljs.highlightAll();
+  </script>
+</head>
+<body>
+
+  <header>
+    <h1>Detailed Analysis of C# `Memory<T>` and `ReadOnlyMemory<T>` Types: Inefficiencies and Hazards</h1>
+  </header>
+
+  <main>
+    <article id="article-id" class="blog-article">
+<h1>Detailed Analysis of C# <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> Types: Inefficiencies and Hazards</h1>
+<p>Let's talk about the <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> types. These types were introduced in C# 7.2 and are used to represent contiguous regions of memory. They are similar to <code class="notranslate">Span&lt;T&gt;</code> and <code class="notranslate">ReadOnlySpan&lt;T&gt;</code>, but designed to be heap-safe for use in asynchronous code.</p>
+<p>Yet, a careful examination of these types uncovers various inefficiencies and potential hazards. Today, we will highlight and discuss three main issues:</p>
+<ol>
+<li>The slow performance of the Span property</li>
+<li>Memory safety concerns when using <code class="notranslate">MemoryManager&lt;T&gt;</code></li>
+<li>The potential for complications when these types are employed across multiple threads</li>
+</ol>
+<h2>Slow Performance of the Span Property</h2>
+<p>To start, we are looking at the Span property. Both <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> types feature a Span property, which is used to retrieve a <code class="notranslate">Span&lt;T&gt;</code> or <code class="notranslate">ReadOnlySpan&lt;T&gt;</code> around the underlying data. Although this appears to be a useful feature, it has a significant limitation—it is notably slow.</p>
+<p>C# properties are generally expected to be fast, leading developers to presume that retrieving a Span from memory should be an O(1), or constant time operation. However, due to the way these types are implemented, this assumption is incorrect. The Span property conducts a check to determine if the memory object is backed by an array or a <code class="notranslate">MemoryManager&lt;T&gt;</code>, adding an overhead that wouldn't exist with a simple array.</p>
+<p>This unexpected slowness contradicts the principle of least surprise, as developers typically expect properties to behave in certain ways. While it might not strictly be a design flaw, it certainly necessitates a thoughtful approach to using these types.</p>
+<h2>Memory Safety Concerns with <code class="notranslate">MemoryManager&lt;T&gt;</code></h2>
+<p>Secondly, there are inherent memory safety issues when using <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> types with <code class="notranslate">MemoryManager&lt;T&gt;</code>. Despite <code class="notranslate">MemoryManager&lt;T&gt;</code> providing a means to customise memory allocation and deallocation, it can also create dangling references.</p>
+<p>Specifically, an instance of <code class="notranslate">Memory&lt;T&gt;</code> or <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> can hold a reference from a <code class="notranslate">MemoryManager&lt;T&gt;</code> even after it has been disposed. This could lead to a <code class="notranslate">Memory&lt;T&gt;</code> object referencing invalid memory, resulting in unpredictable behaviour. As such, using <code class="notranslate">MemoryManager&lt;T&gt;</code> requires precise attention to avoid this potential memory safety issue.</p>
+<p>In comparison, common data structures like <code class="notranslate">List&lt;T&gt;</code> and arrays provide better memory safety. They manage the allocation and deallocation of memory themselves and prevent access to invalid memory references. These safety features make these structures more suitable for general-purpose use, whereas <code class="notranslate">Memory&lt;T&gt;</code> needs careful handling to ensure memory safety.</p>
+<h2>Complications with Multithreading</h2>
+<p>Finally, using <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> types across multiple threads can lead to complications. These types do not provide built-in synchronisation or atomicity guarantees. This means that one thread can modify the data of a <code class="notranslate">Memory&lt;T&gt;</code> while another thread is reading from it, leading to a race condition.</p>
+<p>In multithreaded scenarios, it's up to the developer to ensure synchronisation. This can be accomplished with locks, Monitor, Mutex, Semaphore, or other synchronisation constructs, though this introduces an extra layer of complexity and potential overhead.</p>
+<p>It's also important to note that these types do not provide range checking. This means developers need to be diligent to avoid accessing memory outside the bounds of the <code class="notranslate">Memory&lt;T&gt;</code> or <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> instances to prevent runtime errors or data corruption.</p>
+<h2>Conclusion</h2>
+<p>In conclusion, while <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> bring new capabilities to the C# language, they also introduce inefficiencies and potential pitfalls. The slow performance of the Span property, the memory safety concerns with <code class="notranslate">MemoryManager&lt;T&gt;</code>, the lack of inherent thread safety, and the absence of range checking are all critical factors that developers need to understand. This serves as a reminder that every tool, no matter how new or exciting, requires a deep understanding of its workings and potential shortcomings. Until our next discussion, code safely!</p>
+<p>References:</p>
+<ul>
+<li>C# 7.2—<code class="notranslate">Span&lt;T&gt;</code> and universal memory management, F#, C# and functional programming blog by Eirik Tsarpalis</li>
+<li>Microsoft Docs</li>
+</ul>    </article>
+  </main>
+
+  <footer>
+    <p>''</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nano-COM</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script defer>
+    // GitHub markdown API quirk - when you use `bash` syntax highlighting it generates `shell`.
+    // `highlight.js` shell highlighting is awful, so change it to bash
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('.highlight-source-shell').forEach((element) => {
+        element.classList.remove('highlight-source-shell');
+        element.classList.add('highlight-source-bash');
+      });
+    });
+
+    hljs.configure({
+      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
+      cssSelector: 'div.highlight pre, pre code',
+      // The GitHub markdown API generates `highlight-source-<LANG>`
+      languageDetectRe: /\bhighlight-source-([\w-]+)\b/i,
+    });
+
+    hljs.highlightAll();
+  </script>
+</head>
+<body>
+
+  <header>
+    <h1>Nano-COM</h1>
+  </header>
+
+  <main>
+    <article id="article-id" class="blog-article">
+<h1>Nano-COM</h1>
+<h2>Table Of Contents</h2>
+<ul>
+<li><a href="COM-vs-Nano-Com">COM vs Nano-COM</a></li>
+<li><a href="IUnknown">IUnknown</a></li>
+<li><a href="Reference-Counting">Reference Counting</a></li>
+<li><a href="PrivateData-and-object-names">PrivateDate and object names</a></li>
+<li><a href="IIDs-and-CLSIDs">IIDs and CLSIDs</a></li>
+<li><a href="QueryInterface">QueryInterface</a></li>
+<li><a href="Versioning">Versioning</a></li>
+<li><a href="HRESULTs">HRESULTs</a></li>
+<li><a href="COM-pointe-types">COM pointer types</a></li>
+<li><a href="Debugging-COM-leaks">Debugging COM leaks</a></li>
+</ul>
+<h2>COM vs Nano-COM</h2>
+<ul>
+<li>COM stands for Component Object Model, and is a programming interface standard made by Microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like <code class="notranslate">CoCreateInstance</code> and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.</li>
+</ul>
+<p>DirectX uses a interface model referred to casually as "Nano-COM", which utilises the ABI (application-binary interface - a topic for another article, but basically how different programs interact on a binary level, e.g parameter passing, errors, etc), as well as the error-code model of COM.</p>
+<p>As anyone who has worked with COM or Win32 before will know, windows loves its <code class="notranslate">typedef</code>s. Not too many are essential to know, but a few are frequently used in COM code:</p>
+<ul>
+<li><code class="notranslate">REFGUID</code> - GUID pointer in C/C#, GUID reference in C++</li>
+<li><code class="notranslate">UINT/ULONG</code> - 32 bit unsigned int</li>
+<li><code class="notranslate">LPVOID</code> - <code class="notranslate">void*</code></li>
+<li><code class="notranslate">HRESULT</code> - 32 bit signed int used as error code (sign bit indicates failure (negative num) or success (positive num))</li>
+</ul>
+<h2>IUnknown</h2>
+<p><code class="notranslate">IUnknown</code> is the base interface of all COM types. Everything derives from it, and DirectX interfaces are no exception. This interface has 3 methods, which allow reference counting and inheritance/aggregation, and are the core methods required to manage arbitrary COM objects. (All these methods must be thread safe)</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">UINT <span class="pl-en">AddRef</span>();
+UINT <span class="pl-en">Release</span>();
+HRESULT <span class="pl-en">QueryInterface</span>(REFGUID pIID, <span class="pl-k">void</span>** ppvObject);</pre></div>
+<p>All these methods will soon be explained - for now, just understand that any COM interface is implicitly convertable to an <code class="notranslate">IUnknown*</code>. Similar to Java's <code class="notranslate">Java.lang.Object</code> type or .NET's <code class="notranslate">System.Object</code> type, it acts as the base of all types in the ecosystem.</p>
+<blockquote>
+<p>Note: You always work through COM objects with pointers. Never ever derefence them (if your language allows it). You will get horrible object slicing and inevitable memory corruption. :(</p>
+</blockquote>
+<h2>Reference Counting</h2>
+<p>COM objects are memory-managed by reference counting, where the COM object stores how many references to it exist to control its lifetime, and then destroys itself when there are none left (never use <code class="notranslate">delete</code> on a COM interface!). <code class="notranslate">AddRef</code> and <code class="notranslate">Release</code> are the 2 methods used for manipulating reference counts. <code class="notranslate">AddRef</code>, as the name suggests, increments the object's internal reference counter, and then it returns the <em>new</em> reference count. <code class="notranslate">Release</code> decrements the COM object's internal counter, and then it also returns the new reference count (note that the documentation for <code class="notranslate">IUnknown</code> says these return values should only be relied upon for testing purposes, and not for general code (it isn't your business how many references a COM object has!)). If the call to <code class="notranslate">Release</code> results in the counter decrementing to 0, then the COM object's lifetime ends, and it is destroyed, roughly speaking. However, the DirectX runtime may keep objects alive even when their ref count appears to be 0 because they are still in use - and in D3D11 there are cases where because of this behaviour, some objects were revivable. However, from an app perspective, this is fairly irrelevant and shouldn't be a concern. Any further calls on the object are undefined behaviour (you can't "revive" it with an <code class="notranslate">AddRef</code> call). It is worth noting that the D3D12 debug layer frequently will warn you of double-releasing an object, but often will simply crash if you invoke other methods on a destroyed object.</p>
+<h2>PrivateDate and object names</h2>
+<p>Private data and object names are a DirectX concept, <em>not</em> a COM concept, but they are very much worth covering here. All D3D12 interfaces inherit from <code class="notranslate">ID3D12Object</code> (which in turn inherits from <code class="notranslate">IUnknown</code>), which contains the private data methods.<br>
+For completeness, all the DirectX "base" objects are:</p>
+<ul>
+<li>DXGI - <code class="notranslate">IDXGIObject</code></li>
+<li>D3D11 - <code class="notranslate">ID3D11Device</code> and <code class="notranslate">ID3D11DeviceChild</code> (everything inherits from the latter <em>except</em> the former, which inherits from <code class="notranslate">IUnknown</code>)</li>
+<li>DML (Direct ML) - <code class="notranslate">IDMLObject</code></li>
+</ul>
+<p>All of these types have 3 methods.</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">HRESULT <span class="pl-en">GetPrivateData</span>(REFGUID guid, UINT* pDataSize, <span class="pl-k">void</span>* data);
+HRESULT <span class="pl-en">SetPrivateData</span>(REFGUID guid, UINT dataSize, <span class="pl-k">const</span> <span class="pl-k">void</span>* data);
+HRESULT <span class="pl-en">SetPrivateDataInterface</span>(REFGUID guid, IUnknown* data);</pre></div>
+<p><code class="notranslate">ID3D12Object</code> and <code class="notranslate">IDMLObject</code> usefully have a fourth method:</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">HRESULT <span class="pl-en">SetName</span>(<span class="pl-c"><span class="pl-c">/*</span> I hate this type name too. It is a WCHAR*. Just a UTF16 string I promise <span class="pl-c">*/</span></span> LPCWSTR Name);</pre></div>
+<p>This is just shorthand for <code class="notranslate">SetPrivateData</code> with <code class="notranslate">WKPDID_D3DDebugObjectNameW</code> (<code class="notranslate">WKPDID</code> means Well-Known Pointer to Data ID) GUID. For ASCII strings, use <code class="notranslate">WKPDID_D3DDebugObjectName</code> and manual <code class="notranslate">SetPrivateData</code>.</p>
+<p>These are effectively hashmap methods on every object, allowing you to store arbitrary data in them. The most common one by far is storing the object name, either via <code class="notranslate">SetName</code> or <code class="notranslate">WKPDID_D3DDebugObjectNameW</code>/<code class="notranslate">WKPDID_D3DDebugObjectName</code>, which debugging tools and the DirectX runtime recognise for error messages, which makes life easier. Just generate a new IID for the data you want to store and tada, you can attach it.</p>
+<p>GUIDs are used for identifying the data, and are sometimes called DIDs (Data-IDs).</p>
+<p><code class="notranslate">SetPrivateData</code> sets data associated with a guid for retrieval later. Set <code class="notranslate">dataSize</code> to <code class="notranslate">0</code> and <code class="notranslate">data</code> to <code class="notranslate">NULL</code> to destroy associated data for a guid.</p>
+<p><code class="notranslate">SetPrivateDataInterface</code> allows you to associate other COM interfaces with an object, by passing it as an <code class="notranslate">IUnknown</code>. This way, each call to <code class="notranslate">GetPrivateData</code> will result in an <code class="notranslate">AddRef</code> so that reference counting still works. You use the standard <code class="notranslate">GetPrivateData</code> to retrieve it, with a size of <code class="notranslate">void*</code>, and then must <code class="notranslate">Release</code> the returned interface when finished with it. If the object you called <code class="notranslate">SetPrivateDataInterface</code> is destroyed, it calls <code class="notranslate">Release</code> on all its set interfaces, allowing you to associate lifetimes between objects.</p>
+<p><code class="notranslate">GetPrivateData</code>, when <code class="notranslate">pData</code> is <code class="notranslate">NULL</code>, writes the stored data size to the <code class="notranslate">pDataSize</code> parameter allowing you to determine the size if necessary (for an array or variable sized type). When <code class="notranslate">pData</code> is not <code class="notranslate">NULL</code>, if it is larger than the size of the stored data, the data will be written to <code class="notranslate">data</code> and then the amount of data written will be written to <code class="notranslate">pDataSize</code>.</p>
+<p>E.g, to retrieve a fixed size structure and a name</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template </span>&lt;<span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+T <span class="pl-en">RetrieveNamedData</span>(ID3D12Object* pObj, REFGUID did)
+{
+    T val;
+    UINT size = <span class="pl-k">sizeof</span>(val);
+    <span class="pl-k">if</span> (<span class="pl-c1">FAILED</span>(pObj-&gt;<span class="pl-c1">GetPrivateData</span>(did, &amp;size, &amp;val)) || size != <span class="pl-k">sizeof</span>(val))
+    {
+        <span class="pl-k">throw</span> <span class="pl-smi">std::runtime_error</span>(...);
+    }
+    <span class="pl-k">return</span> val;
+}
+
+std::wstring <span class="pl-en">RetrieveName</span>(ID3D12Object* pObj)
+{
+    REFGUID did = WKPDID_D3DDebugObjectNameW;
+    UINT size = <span class="pl-c1">0</span>;
+    <span class="pl-k">if</span> (<span class="pl-c1">FAILED</span>(pObj-&gt;<span class="pl-c1">GetPrivateData</span>(did, &amp;size, <span class="pl-c1">nullptr</span>)) || size == <span class="pl-c1">0</span>)
+    {
+        <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">L"</span>Unnamed object<span class="pl-pds">"</span></span>;
+    }
+
+    std::wstring <span class="pl-smi">name</span>(<span class="pl-c1">0</span>, size);
+    <span class="pl-c1">assert</span>(<span class="pl-c1">SUCCEEDED</span>(pObj-&gt;<span class="pl-c1">GetPrivateData</span>(did, &amp;size, name.<span class="pl-c1">data</span>()))); <span class="pl-c"><span class="pl-c">//</span> not thread safe example</span>
+    <span class="pl-k">return</span> name;
+}</pre></div>
+<h2>IIDs and CLSIDs</h2>
+<ul>
+<li>GUID = Globally Unique IDentifier</li>
+<li>IID = Interface IDentifier</li>
+<li>CLSID = CLass Identifier</li>
+</ul>
+<p>A GUID isn't a COM concept, and just means Globally-Unique ID. They are just a 128 bit value to identify something. Because 2^128 is big (really big. really really big. really really really big), you can generally assume any generated GUID is unique. Visual Studio has an inbuilt generator to create GUIDs for various formats, or you can use a website such as <a href="https://guidgenerator.com" rel="nofollow">guidgenerator</a>.</p>
+<p>An IID is used to identify an interface programmatically, as a sort of crude RTTI system. For example, the IID of <code class="notranslate">IUnknown</code> is <code class="notranslate">00000000-0000-0000-C000-000000000046</code>, and the IID of <code class="notranslate">ID3D12Device</code> is <code class="notranslate">189819F1-1DB6-4B57-BE54-1821339B85F7</code>.</p>
+<p>To retrieve an IID of an interface, in Visual C++ or C# (with <code class="notranslate">TerraFX.Interop.Windows</code>) you can use the <code class="notranslate">__uuidof</code> operator.</p>
+<p>You will commonly find the combination of an <code class="notranslate">IID</code> and a <code class="notranslate">void**</code> being used to represent some sort of COM interface output. The IID represents which interface you want to receive, and the <code class="notranslate">void**</code> is the<br>
+actual pointer to be outputted to. For example, <code class="notranslate">QueryInterface</code> uses this pattern.<br>
+To simplify it, there is a macro called <code class="notranslate">IID_PPV_ARGS</code> in <code class="notranslate">combaseapi.h</code></p>
+<p>A CLSID is similar to an IID, except it represents a concrete instance of a type rather than an interface. These aren't used in core DirectX but they <em>are</em> used by the DirectX Shader Compiler and so are worth briefly covering.</p>
+<p><code class="notranslate">DxcCreateInstance</code> is a factory method used to create interfaces, and it takes two IIDs (unlike factory methods like <code class="notranslate">D3D12CreateDevice</code>). One IID, to indicate the type you are representing it as (e.g, <code class="notranslate">DxcCompiler</code> is a valid <code class="notranslate">IDxcCompiler</code>, <code class="notranslate">IDxcCompiler2</code>, and <code class="notranslate">IDxcCompiler3</code>), and one CLSID to indicate which type you want to create to implement that interface (currently there is only one option for each interface as far as I know, but this could change).</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">IDxcCompiler* compiler;
+<span class="pl-en">DxcCreateInstance</span>(CLSID_DxcUtils, __uuidof(*compiler), CLSID_DxcCompiler);</pre></div>
+<div class="highlight highlight-source-c++"><pre class="notranslate">IUnknown* pUnk;
+GUID unknown_iid = __uuidof(IUnknown);
+<span class="pl-c"><span class="pl-c">//</span> or</span>
+GUID unknown_iid = __uuidof(*pUnk);</pre></div>
+<div class="highlight highlight-source-cs"><pre class="notranslate"><span class="pl-smi">IUnknown<span class="pl-c1">*</span></span> <span class="pl-s1">pUnk</span><span class="pl-kos">;</span>
+<span class="pl-smi">Guid</span> <span class="pl-s1">unknownIid</span> <span class="pl-c1">=</span> <span class="pl-smi">__uuidof</span><span class="pl-c1">&lt;</span><span class="pl-smi">IUnknown</span><span class="pl-c1">&gt;</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">;</span>
+<span class="pl-c">// or</span>
+<span class="pl-smi">Guid</span> <span class="pl-s1">unknownIid</span> <span class="pl-c1">=</span> __uuidof<span class="pl-kos">(</span><span class="pl-c1">*</span><span class="pl-s1">pUnk</span><span class="pl-kos">)</span><span class="pl-kos">;</span></pre></div>
+<p>You can also use the static IID definitions in the various DX header files, such as</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">GUID unknown_iid = IID_IUnknown;</pre></div>
+<p>Doing this requires linking against <code class="notranslate">dxguid.lib</code>, unless you want your linker to kaboom.</p>
+<h2>QueryInterface, inheritance, and aggregation</h2>
+<p><code class="notranslate">QueryInterface</code> is the method used for casting safely between COM interfaces.<br>
+It is analagous to a slightly more restrictive version of <code class="notranslate">is/as</code> in C#, <code class="notranslate">instanceof</code> in Java/Python, and <code class="notranslate">dynamic_cast</code> in C++.</p>
+<p>To recap, the signature is</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">HRESULT <span class="pl-en">QueryInterface</span>(REFGUID iid, <span class="pl-k">void</span>** ppvObject);</pre></div>
+<p>This <code class="notranslate">IID</code> + <code class="notranslate">ppvObject</code> pattern pops up a lot, so there is a macro to help you. <code class="notranslate">IID_PPV_ARGS</code>, which is defined as roughly (it actually uses a complex fancy template, but this gets the point across):</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">define</span> <span class="pl-en">IID_PPV_ARGS</span>(<span class="pl-v">pObj</span>) __uuidof(*(pObj)), (<span class="pl-k">void</span> **)(pObj)</pre></div>
+<p>You use it as such:</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">IComInterfaceBlah* res = <span class="pl-c1">nullptr</span>;
+<span class="pl-en">SomeIidPpvMethod</span>(..., IID_PPV_ARGS(&amp;res));</pre></div>
+<p>You can find this macro in <code class="notranslate">combaseapi.h</code> as well as in the DirectX-Headers and DirectXTK12 repos on github.</p>
+<p>COM has both inheritance and aggregation, and uses <code class="notranslate">QueryInterface</code> to encompass both.<br>
+Inheritance here meaning identity conversions (so your pointer to an <code class="notranslate">ID3D12Device7</code> is actually also an <code class="notranslate">ID3D12Device4</code>), whereas aggregation simply means the interface may contain the desired interface as a field, meaning it can only be accessed through <code class="notranslate">QueryInterface</code><br>
+(your <code class="notranslate">ID3D12Devic4</code> might support <code class="notranslate">ID3D12Device7</code>, but it itself is not necessarily an <code class="notranslate">ID3D12Device7</code>).</p>
+<p>The <code class="notranslate">iid</code> parameter is the IID of the interface you want. <code class="notranslate">ppvObject</code> is a pointer to the interface-pointer it will be outputted to.<br>
+Note: You can <em>never</em> safely downcast a COM pointer based on a <code class="notranslate">QueryInterface</code> result. Your <code class="notranslate">ID3D12Device</code> may implement <code class="notranslate">ID3D12Device1</code>, but not necessarily through the original pointer.<br>
+You can safely upcast where there is an explicit inheritance - e.g <code class="notranslate">ID3D12Device1</code> inherits from <code class="notranslate">ID3D12Device</code>, so it can be safely converted to an <code class="notranslate">ID3D12Device*</code>. However, an arbitrary <code class="notranslate">ID3D12Device</code><br>
+may have been created in some way where its child interfaces are exposed through aggregation rather than inheritance, so the returned object could be different. However, because that interface <em>does</em> directly inherit from <code class="notranslate">ID3D12Device</code>, you can safely upcast it. It's a little bit to wrap your head around.</p>
+<p>C++ has a convenience overload of <code class="notranslate">QueryInterface</code> which takes a typed <code class="notranslate">ppvObject</code> and gets the <code class="notranslate">IID</code> for you.</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">Q</span>&gt;
+HRESULT <span class="pl-en">QueryInterface</span>(Q** pp)
+{
+    <span class="pl-k">return</span> <span class="pl-c1">QueryInterface</span>(<span class="pl-c1">__uuidof</span>(Q), (<span class="pl-k">void</span> **)pp);
+}</pre></div>
+<p><code class="notranslate">QueryInterface</code> can return 3 things. <code class="notranslate">E_POINTER</code>, meaning your <code class="notranslate">ppvObject</code> was <code class="notranslate">NULL</code> and so the call failed. <code class="notranslate">E_NOINTERFACE</code>, meaning the call succeeded but the interface could not be supplied (it isn't inherited or aggregated), and <code class="notranslate">ppvObject</code> has been set to <code class="notranslate">NULL</code>, or <code class="notranslate">S_OK</code> meaning it succeeded and <code class="notranslate">ppvObject</code> is set to the desired interface and had a reference added to it, and must be <code class="notranslate">Release</code>d when it is finished being used.</p>
+<h2>Versioning</h2>
+<p>DirectX uses a very simple (but in my opinion, quite elegant) technique for versioning. Each new version of an interface just has an incrementing number attached to it. E.g <code class="notranslate">ID3D12Device</code>, <code class="notranslate">ID3D12Device1</code>, ..., all the way to <code class="notranslate">ID3D12Device9</code> now. As a general rule, <code class="notranslate">ID3D12FooN</code> inherits from <code class="notranslate">ID3D12Foo(N-1)</code>, and so you can safely upcast, but to get to <code class="notranslate">ID3D12FooN</code> from <code class="notranslate">ID3D12Foo(N+1)</code> you <em>must</em> <code class="notranslate">QueryInterface</code>. The exception is all the debug interfaces, (they all inherit from <code class="notranslate">IUnknown</code> instead! why!!! why!!!!. except <code class="notranslate">ID3D12Debug3</code>... which inherits from <code class="notranslate">ID3D12Debug</code>... just to make it more confusing).</p>
+<p>This is one of the reasons most creation methods take an <code class="notranslate">IID</code> + <code class="notranslate">ppvObject</code>. Instead of doing</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">ID3D12Resource* pTmp;
+ID3D12Resource4* pRes;
+
+<span class="pl-en">ThrowIfFailed</span>(device-&gt;<span class="pl-en">CreateResource</span>(..., &amp;pTmp));
+<span class="pl-en">ThrowIfFailed</span>(pTmp-&gt;<span class="pl-en">QueryInterface</span>(IID_PPV_ARGS(&amp;pRes)));
+pTmp-&gt;<span class="pl-en">Release</span>();</pre></div>
+<p>you can just do</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">ID3D12Resource4* pRes;
+<span class="pl-en">ThrowIfFailed</span>(device-&gt;<span class="pl-en">CreateResource</span>(..., IID_PPV_ARGS(&amp;pRes)));</pre></div>
+<h2>HRESULTs</h2>
+<p>A <code class="notranslate">HRESULT</code> is a 32 bit signed integer representing an error or success code. The reason for the slightly strange naming is that it was originally a result-handle, rather than an error code, (like a <code class="notranslate">HWND</code> is a window-handle, a <code class="notranslate">HINSTANCE</code> is an instance-handle, a <code class="notranslate">HRESULT</code> was a result-handle). But that was too heavy and deemed unnecessary early on, so it became a 32 bit signed integer error code instead.</p>
+<p>A <code class="notranslate">HRESULT</code> has 3 elements - a severity (error or success), a facility (where it comes from), and a code (what it is). The severity is the sign bit, where a 1 (negative number) means an error and a 0 (positive number) means a success. To inspect this bit, there are 2 macros in <code class="notranslate">winerror.h</code>:</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">define</span> <span class="pl-en">FAILED</span>(<span class="pl-v">hr</span>) (((HRESULT)(hr)) &lt; <span class="pl-c1">0</span>)
+#<span class="pl-k">define</span> <span class="pl-en">SUCCEEDED</span>(<span class="pl-v">hr</span>) (((HRESULT)(hr)) &gt;= <span class="pl-c1">0</span>)</pre></div>
+<p>There are <code class="notranslate">HRESULT_SEVERITY</code>, <code class="notranslate">HRESULT_FACILITY</code>, <code class="notranslate">HRESULT_CODE</code>, and <code class="notranslate">MAKE_HRESULT</code> macros too that are relatively self explanatory, but generally not used for DirectX.</p>
+<p>There are only 2 success codes used by DirectX:</p>
+<ul>
+<li><code class="notranslate">S_OK</code> - the value 0, the bog standard "yeah that worked" code</li>
+<li><code class="notranslate">S_FALSE</code> - success, but "alternative" success. Most frequently used in DirectX for <code class="notranslate">CreateXXX(...)</code> methods, where the output object (<code class="notranslate">ppvObject</code>) is <code class="notranslate">NULL</code> and so object creation is <em>tested</em> for success rather than created. In this case, <code class="notranslate">S_FALSE</code> is returned for success</li>
+</ul>
+<blockquote>
+<p>Note: Every single <code class="notranslate">CreateXXX</code> method (including <code class="notranslate">D3D12CreateDevice</code>) can have a valid <code class="notranslate">IID</code> passed and a <code class="notranslate">NULL</code> <code class="notranslate">ppvObject</code> to test creation. This can be useful.</p>
+</blockquote>
+<p>The important error codes to know are:</p>
+<ul>
+<li>
+<p><code class="notranslate">E_POINTER</code> - something is <code class="notranslate">null</code> that shouldn't be</p>
+</li>
+<li>
+<p><code class="notranslate">E_FAIL</code> - something went wrong!</p>
+</li>
+<li>
+<p><code class="notranslate">E_INVALIDARG</code> - ...pretty self explanatory</p>
+</li>
+<li>
+<p><code class="notranslate">E_NOINTERFACE</code> - an interface could not be provided or wasn't supported</p>
+</li>
+<li>
+<p><code class="notranslate">E_OUTOFMEMORY</code> - can either mean local (system) memory or device (GPU) memory is exhausted - local memory exhaustion is generally fatal, but device memory exhaustation often isn't</p>
+</li>
+<li>
+<p><code class="notranslate">D3D12_ERROR_ADAPTER_NOT_FOUND</code> - you are trying to use a shader/pipeline cache from a different adapter</p>
+</li>
+<li>
+<p><code class="notranslate">D3D12_ERROR_DRIVER_VERSION_MISMATCH</code> - you are trying to use a shader/pipeline cache (or serialized data) from a different driver version</p>
+</li>
+<li>
+<p><code class="notranslate">DXGI_ERROR_INVALID_CALL</code> - returned sometimes by DXGI methods instead of <code class="notranslate">E_INVALIDARG</code></p>
+</li>
+<li>
+<p><code class="notranslate">DXGI_ERROR_WAS_STILL_DRAWING</code> - very specifically returned by <code class="notranslate">IDXGISwapChain::Present</code> with flag <code class="notranslate">DXGI_PRESENT_DO_NOT_WAIT</code>, when the call without the flag would have resulted in a wait</p>
+</li>
+</ul>
+<p>All of the following indicate device removal:</p>
+<ul>
+<li><code class="notranslate">DXGI_ERROR_DEVICE_REMOVED</code> - device was removed, either physical removal or due to invalid API usage</li>
+<li><code class="notranslate">DXGI_ERROR_DEVICE_HUNG</code> - the device was removed because it hung and wouldn't respond</li>
+<li><code class="notranslate">DXGI_ERROR_DEVICE_RESET</code> - device was reset, e.g by a driver update</li>
+<li><code class="notranslate">DXGI_ERROR_DRIVER_INTERNAL_ERROR</code> - a driver error caused device loss. Contact your IHV and then cry furiously</li>
+</ul>
+<h2>COM pointer types</h2>
+<ul>
+<li>
+<p>ATL <code class="notranslate">CComPtr</code> - this type is old and nigh-on deprecated so honestly... ignore it</p>
+</li>
+<li>
+<p>WRL <code class="notranslate">ComPtr</code> - the standard COM pointer type you see in most samples and tutorials. Get it from DirectXTK12 or <code class="notranslate">wrl/client.h</code></p>
+</li>
+<li>
+<p>WinRt <code class="notranslate">com_ptr</code> - as far as I know, the ""officially"" recommended one, but basically interchangeable with the other 2 in terms of quality</p>
+</li>
+<li>
+<p>WIL <code class="notranslate">com_ptr_t</code></p>
+</li>
+</ul>
+<p>These 3 types all have one primary role, which is to manage <code class="notranslate">AddRef</code>/<code class="notranslate">Release</code> for you, so they <code class="notranslate">Release</code> at the end of their lifetime, and <code class="notranslate">AddRef</code> when copied, etc</p>
+<p>Some note-worthy points about these types:</p>
+<ul>
+<li>WinRt <code class="notranslate">com_ptr</code> does not overload <code class="notranslate">&amp;</code> to release the underlying address, so <code class="notranslate">IID_PPV_ARGS</code> doesn't work, so it sucks.</li>
+<li><code class="notranslate">com_ptr_t</code> and <code class="notranslate">ComPtr</code> both overload <code class="notranslate">&amp;</code> (equivalent to <code class="notranslate">ReleaseAndGetAddress</code> for <code class="notranslate">ComPtr</code>, and <code class="notranslate">put</code> for <code class="notranslate">com_ptr_t</code>) so that it releases the underlying pointer (if one is present), so that <code class="notranslate">IID_PPV_ARGS</code> and using it as an output parameter works. <strong>IMPORTANTLY</strong>, do not use it as a single element array. E.g, I have seen</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">ComPtr&lt;ID3D12DescriptorHeap&gt; _resHeap;
+
+cmdList-&gt;<span class="pl-en">SetDescriptorHeaps</span>(<span class="pl-c1">1</span>, &amp;_resHeap); <span class="pl-c"><span class="pl-c">//</span> you just released the descriptor heap before passing it, and have now caused use-after-free. Use .GetAddressOf (or addressof for com_ptr_t instead)</span></pre></div>
+<h2>Debugging COM leaks</h2>
+<p>COM leaks are a real, real, real pain to debug. Thankfully, DirectX has a few helpers that make discovering and fixing leaks a lot easier.</p>
+<p>Your first port of call should be <code class="notranslate">ID3D12DebugDevice::ReportLiveDeviceObjects</code> (<code class="notranslate">QueryInterface</code> the debug device off of the D3D12 device). I recommend using <code class="notranslate">D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL</code> flags for noticing leaks - you get object types and names (when named), and ignore stuff being kept alive by the D3D12 runtime, which aren't your responsibility.</p>
+<p><code class="notranslate">ID3DDestructionNotifier</code> is also a useful type. <code class="notranslate">QueryInterface</code> for it off of you D3D12 object, and then call <code class="notranslate">RegisterDestructionCallback</code> that will be called when the object is released (the ref count equals 0). You can then log this, set a breakpoint, etc - just note you cannot safely access the object, as it may have started the destruction process and so the object's internal state is undefined.</p>    </article>
+  </main>
+
+  <footer>
+    <p>''</p>
+  </footer>
+
+</body>
+</html>

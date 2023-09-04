@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Why do I get 'column must appear in the GROUP BY clause or be used in an aggregate function'?</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script defer>
+    // GitHub markdown API quirk - when you use `bash` syntax highlighting it generates `shell`.
+    // `highlight.js` shell highlighting is awful, so change it to bash
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('.highlight-source-shell').forEach((element) => {
+        element.classList.remove('highlight-source-shell');
+        element.classList.add('highlight-source-bash');
+      });
+    });
+
+    hljs.configure({
+      // The GitHub markdown API generates `<div class="highlight"><pre>` instead of `<pre><code>`
+      cssSelector: 'div.highlight pre, pre code',
+      // The GitHub markdown API generates `highlight-source-<LANG>`
+      languageDetectRe: /\bhighlight-source-([\w-]+)\b/i,
+    });
+
+    hljs.highlightAll();
+  </script>
+</head>
+<body>
+
+  <header>
+    <h1>Why do I get 'column must appear in the GROUP BY clause or be used in an aggregate function'?</h1>
+  </header>
+
+  <main>
+    <article id="article-id" class="blog-article">
+<h1>Why do I get 'column must appear in the GROUP BY clause or be used in an aggregate function'?</h1>
+<p>This is an error I see plague people new to SQL, and I find the Stack Overflow posts that come up when googling it to be pretty useless, so I thought I'd write up some help on it.</p>
+<p>Let's query our imaginary database for all our users.</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> <span class="pl-k">*</span> <span class="pl-k">FROM</span> users;</pre></div>
+<p>This query, unsuprisingly, works fine and returns what we expect.</p>
+<pre class="notranslate"><code class="notranslate">  id   |         email         | first_name | last_name 
+-------+-----------------------+------------+-----------
+ 0     | veryreal@emailll.com  | Jon        | Smith
+ 1     | myfakeemail@email.com | John       | Kelly
+(2 rows)
+</code></pre>
+<p>Let's now query how many users there are.</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> <span class="pl-c1">COUNT</span>(<span class="pl-k">*</span>) <span class="pl-k">FROM</span> users;</pre></div>
+<p>Again, the expected result. All simple stuff.</p>
+<pre class="notranslate"><code class="notranslate">count  
+--------
+ 2
+(1 row)
+</code></pre>
+<p>Now, let's select a user and all their posts.</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> <span class="pl-k">*</span> <span class="pl-k">FROM</span> users <span class="pl-k">JOIN</span> posts <span class="pl-k">ON</span> <span class="pl-c1">posts</span>.<span class="pl-c1">user_id</span> <span class="pl-k">=</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>;</pre></div>
+<pre class="notranslate"><code class="notranslate">  id   |         email         | first_name | last_name |   post_name  | post_length
+-------+-----------------------+------------+-----------+--------------+------------
+ 0     | veryreal@emailll.com  | Jon        | Smith     | Intro        | 10
+ 0     | veryreal@emailll.com  | Jon        | Smith     | Virus        | 882
+ 1     | myfakeemail@email.com | John       | Kelly     | My Blog      | 12645
+ 1     | myfakeemail@email.com | John       | Kelly     | Maths        | 100
+ 1     | myfakeemail@email.com | John       | Kelly     | SqlAggregate | 999
+ 
+(3 rows)
+</code></pre>
+<p>As expected, we get all the posts of the user joined with the user. What about if we decide we don't actually care about the posts and just want the number of posts each user has? The obvious next step would be</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>, <span class="pl-c1">COUNT</span>(posts) <span class="pl-k">FROM</span> users <span class="pl-k">JOIN</span> posts <span class="pl-k">ON</span> <span class="pl-c1">posts</span>.<span class="pl-c1">user_id</span> <span class="pl-k">=</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>;</pre></div>
+<p>It's here where we finally meet our dreaded error.</p>
+<pre class="notranslate"><code class="notranslate">ERROR:  column "users.id" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT users.id, COUNT(posts) FROM users JOIN post...
+               ^
+SQL state: 42803
+Character: 8
+</code></pre>
+<p>But why?! What on earth is wrong with our query. It sure <em>feels</em> valid, and <code class="notranslate">COUNT</code> was working just a second ago...</p>
+<p>To understand why this query doesn't actually make sense, it helps to look at a simpler example.</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> id, <span class="pl-c1">COUNT</span>(<span class="pl-k">*</span>) <span class="pl-k">FROM</span> users;</pre></div>
+<p>Think through this query - given that we have already ran queries for the count of users and to select users already - and what you'd expect it to return. You can start to see why this query wouldn't make sense. Where would the count result go? On every record? That doesn't make sense, as it isn't part of each record. In reality, <code class="notranslate">COUNT(*)</code> is completely different to selecting attributes, as instead of operating on each record it is operating on the entirety of the result of the query - it is <em>aggregating</em> the output. If you really wanted that (you almost certainly don't), it would make more sense for it just to be a subquery. It'll be optimised away by the database so would only execute once.</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> id, (<span class="pl-k">SELECT</span> <span class="pl-c1">COUNT</span>(<span class="pl-k">*</span>) <span class="pl-k">FROM</span> users) <span class="pl-k">FROM</span> users;</pre></div>
+<p>By thinking about why the earlier query doesn't make sense, and the fact that a join just creates a record with the data from both records in the join, you can start to see why this error occurs. <code class="notranslate">SELECT users.id, COUNT(posts)</code> is really saying "for each record, select <code class="notranslate">users.id</code> and also the number of records with posts in this entire query". <code class="notranslate">users.id</code> applies per-row, but <code class="notranslate">COUNT(posts)</code> is an aggregate function and applies to the entire query result. <code class="notranslate">COUNT(*)</code> or even <code class="notranslate">COUNT(users)</code> would have the same value here, as all it actually counts is the number of rows returned by joining the two tables.</p>
+<h2>So now I understand why my query doesn't make sense, what is the error message telling me?</h2>
+<p>If the column you're querying is also used in an aggregate function (like <code class="notranslate">COUNT</code>, <code class="notranslate">MIN</code>, <code class="notranslate">MAX</code>, <code class="notranslate">AVG</code>, and <code class="notranslate">SUM</code>, to name a few), the query does make sense.</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> <span class="pl-c1">MIN</span>(id), <span class="pl-c1">MAX</span>(id), <span class="pl-c1">COUNT</span>(<span class="pl-k">*</span>) <span class="pl-k">FROM</span> users; <span class="pl-c"><span class="pl-c">--</span> COUNT(*) is no different from COUNT(id) here</span></pre></div>
+<p>While a bit nonsensical, this query makes complete sense to the database. From the entire table <code class="notranslate">users</code>, select the aggregates <code class="notranslate">MIN(id)</code>, <code class="notranslate">MAX(id)</code>, and <code class="notranslate">COUNT(*)</code>. As they are all aggregates, they don't go on an individual row and are all returned together.</p>
+<pre class="notranslate"><code class="notranslate"> min | max | count  
+-----+-----+--------
+   0 |  1  |   2
+(1 row)
+</code></pre>
+<p>This is the part of the error that says the row can 'be used in an aggregate function' to fix it. But what about 'appear in the GROUP BY clause'?</p>
+<p>Well, let's quickly recap on what <code class="notranslate">GROUP BY</code> does. It groups sets of rows together so that they can be queried on as a, well, group. This is the other scenario where you can get the same error, without using <code class="notranslate">COUNT(*)</code> or a similar aggregate function</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> id <span class="pl-k">FROM</span> users <span class="pl-k">GROUP BY</span> first_name; <span class="pl-c"><span class="pl-c">--</span> nonsensical yes, but pretend it is valid</span></pre></div>
+<p>This nets us the same error as earlier, and this makes sense. How can it select <code class="notranslate">id</code> from a group of rows that could have many different values of <code class="notranslate">id</code>? If we instead select <code class="notranslate">first_name</code>, this works fine, because each group by definition has the same <code class="notranslate">first_name</code></p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> first_name <span class="pl-k">FROM</span> users <span class="pl-k">GROUP BY</span> first_name;</pre></div>
+<pre class="notranslate"><code class="notranslate"> first_name 
+------------
+ Jon
+ John
+(2 rows)
+</code></pre>
+<p>Now, this data isn't very useful, but you can mix in aggregate functions to learn more about these groups. This still makes sense, because each aggregate is per-<em>group</em>, which is the same scope at which <code class="notranslate">first_name</code> is being selected.</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> first_name, <span class="pl-c1">COUNT</span>(<span class="pl-k">*</span>), <span class="pl-c1">MIN</span>(id), <span class="pl-c1">AVG</span>(id) <span class="pl-k">FROM</span> users <span class="pl-k">GROUP BY</span> first_name;</pre></div>
+<pre class="notranslate"><code class="notranslate"> first_name | count | min | avg 
+------------+-------+-----+-----
+ Jon        |   1   |  0  | 0
+ John       |   1   |  1  | 1
+(2 rows)
+</code></pre>
+<p>Of course, still not very useful, but you get the point. This hopefully shows why a field being part of the <code class="notranslate">GROUP BY</code> expression allows it to be selected outside of an aggregate function, because it means that the aggregate functions are operating in the same scope as the attribute is being selected.</p>
+<h2>Brilliant, but how do I count my user's posts!?</h2>
+<p>Of course none of this has told you the best way to actually count the number of associates from the earlier example. There are a few different ways you could go about it</p>
+<h3>Group by</h3>
+<p>Using <code class="notranslate">GROUP BY</code> properly can fix your query. If you group by a primary key or a set of fields with a unique index, you can then access all of the columns on that table in your <code class="notranslate">SELECT</code>, as the <code class="notranslate">GROUP BY</code> having a unique key means that all rows will be in their own group.</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>, <span class="pl-c1">COUNT</span>(posts) <span class="pl-k">FROM</span> users <span class="pl-k">JOIN</span> posts <span class="pl-k">ON</span> <span class="pl-c1">posts</span>.<span class="pl-c1">user_id</span> <span class="pl-k">=</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span> <span class="pl-k">GROUP BY</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>;
+<span class="pl-c"><span class="pl-c">--</span> you can select other columns too, as you use the primary key to group</span>
+<span class="pl-k">SELECT</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>, CONCAT(<span class="pl-c1">users</span>.<span class="pl-c1">first_name</span>, <span class="pl-s"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>, <span class="pl-c1">users</span>.<span class="pl-c1">last_name</span>) <span class="pl-k">AS</span> Name, <span class="pl-c1">COUNT</span>(posts) <span class="pl-k">FROM</span> users <span class="pl-k">JOIN</span> posts <span class="pl-k">ON</span> <span class="pl-c1">posts</span>.<span class="pl-c1">user_id</span> <span class="pl-k">=</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span> <span class="pl-k">GROUP BY</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>;</pre></div>
+<h3>Subquery</h3>
+<p>Using a subquery also works for finding the count</p>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>, (<span class="pl-k">SELECT</span> <span class="pl-c1">COUNT</span>(<span class="pl-k">*</span>) <span class="pl-k">FROM</span> posts <span class="pl-k">WHERE</span> <span class="pl-c1">posts</span>.<span class="pl-c1">user_id</span> <span class="pl-k">=</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>) <span class="pl-k">FROM</span> users;</pre></div>
+<h3>Windows functions</h3>
+<p>When you have more complex queries, that involve multiple joins, often a group by is impossible and a subquery is not efficient enough. In this case, a window function (see your specific database's documentation, here I am using PostgreSQL syntax) allows you to perform an aggregate over a "set of related rows" with a lot more power than default aggregates. To quote the PostgreSQL docs:</p>
+<blockquote>
+<p>A window function performs a calculation across a set of table rows that are somehow related to the current row. This is comparable to the type of calculation that can be done with an aggregate function. But unlike regular aggregate functions, use of a window function does not cause rows to become grouped into a single output row — the rows retain their separate identities. Behind the scenes, the window function is able to access more than just the current row of the query result.</p>
+</blockquote>
+<div class="highlight highlight-source-sql"><pre class="notranslate"><span class="pl-k">SELECT</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>, <span class="pl-c1">COUNT</span>(posts) OVER (PARTITION BY <span class="pl-c1">users</span>.<span class="pl-c1">id</span>) <span class="pl-k">FROM</span> users <span class="pl-k">JOIN</span> posts <span class="pl-k">ON</span> <span class="pl-c1">posts</span>.<span class="pl-c1">user_id</span> <span class="pl-k">=</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span> <span class="pl-k">GROUP BY</span> <span class="pl-c1">users</span>.<span class="pl-c1">id</span>;</pre></div>
+<p>You can see how in this simple query it is effectively the same as the <code class="notranslate">GROUP BY</code> above. This isn't very useful here, but it can be where a <code class="notranslate">GROUP BY</code> isn't possible or has unwanted side effects.</p>    </article>
+  </main>
+
+  <footer>
+    <p>''</p>
+  </footer>
+
+</body>
+</html>
