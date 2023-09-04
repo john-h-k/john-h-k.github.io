@@ -2,16 +2,16 @@
 
 ## Table Of Contents
 
-* [COM vs Nano-COM](COM-vs-Nano-Com)
-* [IUnknown](IUnknown)
-* [Reference Counting](Reference-Counting)
-* [PrivateDate and object names](PrivateData-and-object-names)
-* [IIDs and CLSIDs](IIDs-and-CLSIDs)
-* [QueryInterface](QueryInterface)
-* [Versioning](Versioning)
-* [HRESULTs](HRESULTs)
-* [COM pointer types](COM-pointe-types)
-* [Debugging COM leaks](Debugging-COM-leaks)
+* [COM vs Nano-COM](#com-vs-nano-com)
+* [IUnknown](#iunknown)
+* [Reference Counting](#reference-counting)
+* [PrivateDate and object names](#privatedata-and-object-names)
+* [IIDs and CLSIDs](#iids-and-clsids)
+* [QueryInterface](#queryinterface)
+* [Versioning](#versioning)
+* [HRESULTs](#hresults)
+* [COM pointer types](#com-pointe-types)
+* [Debugging COM leaks](#debugging-com-leaks)
 
 ## COM vs Nano-COM
 

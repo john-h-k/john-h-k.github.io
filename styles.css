@@ -94,40 +94,6 @@ li {
 }
 
 /* Table of contents styling */
-/*
-.toc-container {
-  padding: 1rem;
-  border: 1px solid #ccc;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-.toc-list {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.toc-list li {
-  margin: 0.5rem 0;
-}
-
-.toc-list li a {
-  text-decoration: none;
-  color: #007bff;
-}
-
-.toc-list li a:hover {
-  text-decoration: underline;
-}
-
-.toc-list li code {
-  background-color: #f8f9fa;
-  padding: 2px 4px;
-  font-size: 90%;
-}
-*/
-
-/* Table of Contents Container */
 #toc {
   margin: 20px 0;
   padding: 20px;
