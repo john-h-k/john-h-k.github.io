@@ -1,4 +1,4 @@
-# Nano-COM
+# DirectX's Nano-COM
 
 ## Table Of Contents
 

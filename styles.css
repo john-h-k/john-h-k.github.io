@@ -94,6 +94,7 @@ li {
 }
 
 /* Table of contents styling */
+/*
 .toc-container {
   padding: 1rem;
   border: 1px solid #ccc;
@@ -124,6 +125,44 @@ li {
   padding: 2px 4px;
   font-size: 90%;
 }
+*/
+
+/* Table of Contents Container */
+#toc {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Table of Contents Title */
+#toc h1 {
+  margin-top: 0;
+  font-size: 1.5em;
+}
+
+/* List Styling */
+#toc ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+#toc li {
+  margin: 8px 0;
+}
+
+/* Links */
+#toc a {
+  text-decoration: none;
+  color: #007bff;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+#toc a:hover {
+  color: #0056b3;
+}
+
 
 div.highlight pre, pre code {
   background-color: #f8f9fa;  /* Light gray background */
