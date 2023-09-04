@@ -32,12 +32,8 @@ for file in $(fd . "$template_dir" --extension md); do
   title="$(head -1 "$file" | sed 's/^ *# *//')"
   escaped_title="$(printf '%q' "$title")"
   content="$(cat "$output_name.tmp" | tr -d '\n')"
-  # footer=""
-  # escaped_footer="$(printf '%q' "$footer")"
-  escaped_footer=""
 
   gsed -i "s/\[\[TITLE\]\]/$escaped_title/g" "$output_name"
-  gsed -i "s/\[\[FOOTER\]\]/$escaped_footer/g" "$output_name"
   gsed -i "/[[BODY]]/{
     r $output_name.tmp
     d

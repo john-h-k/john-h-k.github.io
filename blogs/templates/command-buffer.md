@@ -205,8 +205,3 @@ Command reordering is switching around state settings/copies/draws/dispatches, a
 
 Work reordering is a coarser-grained version of command reordering, which more closely relates to pass reordering/culling as done by our render graph. Currently it is not a primary goal of the virtual buffer decoder, but it could well be something to explore. We can create keys about each draw/dispatch based on state (pipeline, bound resources, etc) and sort via these keys (respecting dependencies) to minimise state thrashing on the GPU.
 
-## Other
-
-Join the new Voltium discord! [http://discord.voltium.org](http://discord.voltium.org)
-
-Email me at johnkellyoxford@gmail.com or tweet at @johnkdev
