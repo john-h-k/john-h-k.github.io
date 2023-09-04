@@ -137,6 +137,39 @@ div.highlight pre, pre code {
   border-radius: 3px;
 }
 
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.back-home {
+  margin-right: 20px;
+  text-decoration: none;
+  color: black;
+  font-size: 1.2em;
+  flex-shrink: 0; /* prevent shrinking */
+}
+
+.arrow {
+  margin-right: 8px;
+}
+
+h1 {
+  margin: 0;
+  flex-grow: 1;
+  text-align: center; /* center the title text */
+}
+
+.spacer {
+  flex-shrink: 0; /* prevent shrinking */
+  width: calc(1.2em + 20px + 8px); /* sum of font-size, margin-right and arrow margin */
+}
+
+p {
+  margin: 0.2em;
+}
+
 /* Makes inline code a bit clearer */
 div code, p code, span code, li code, ul code, h1 code, h2 code, h3 code, h4 code, h5 code, h6 code {
   font-size: 1.2em;

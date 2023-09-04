@@ -1,8 +1,6 @@
 # Using Touch ID for `sudo`
 
-macOS is really good at not making you use your login password. _Really_ good. Keychain passwords, new device plugins, setting changes, all can be done 
-via TouchID, which (particularly for those of us with lengthy passwords) is extremely useful.
-One place you can't by default use TouchID is for `sudo`, however it can be enabled manually.
+macOS is really good at not making you use your login password. _Really_ good. Keychain passwords, new device plugins, setting changes, all can be done via TouchID, which (particularly for those of us with lengthy passwords) is extremely useful. One place you can't by default use TouchID is for `sudo`, however it can be enabled manually.
 
 `/etc/pam.d/sudo` is the file used to control the parameters needed to successfully use `sudo`.
 
