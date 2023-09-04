@@ -4,11 +4,26 @@ body, h1, h2, p {
   padding: 0;
 }
 
+h1, h2, h3 {
+  padding: 0.5em 0em;
+}
+
+img {
+  padding: 0.5em 0em;
+}
+
 /* Set background and font */
 body {
   background-color: #fff;
   /* font-family: 'Courier New', monospace; */
   font-family: 'IBM Plex Sans', sans-serif;
+}
+
+code {
+  font-size: 1.2em;
+  padding: 0.1em 0.2em;
+  background-color: #f4f4f4;
+  border-radius: 3px;
 }
 
 /* Style the header */
