@@ -45,13 +45,6 @@ body {
   font-size: 1.4em;
 }
 
-code {
-  font-size: 1.2em;
-  padding: 0.1em 0.2em;
-  background-color: #f4f4f4;
-  border-radius: 3px;
-}
-
 /* Style the header */
 header {
   background-color: #fff;
@@ -119,9 +112,20 @@ footer {
 div.highlight pre, pre code {
   background-color: #f8f9fa;  /* Light gray background */
   border: 1px solid #ccc;      /* Border */
-  padding: 10px;               /* Padding */
-  margin: 10px 0;              /* Margin */
+  margin: 20px 0;              /* Margin */
   overflow-x: auto;            /* Scroll bar if the code is wide */
+
+  font-size: 1.2em;
+  padding: 1em;
+  background-color: #f4f4f4;
+  border-radius: 3px;
+}
+
+div code, p code, span code, li code, ul code {
+  font-size: 1.2em;
+  padding: 0.1em 0.2em;
+  background-color: #f4f4f4;
+  border-radius: 3px;
 }
 
 blockquote {
