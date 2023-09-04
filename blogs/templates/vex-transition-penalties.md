@@ -135,7 +135,7 @@ In reality, your compiler will handle appropriate zeroing and preserving of regi
 
 ## XSAVE and XRSTOR and their relation to preserving upper vector states
 
-This section assumes you know what `xsave` and `xrstor` are. If not, see Volume 1 Chapter 13 of the (Intel Developer Manuals](https://software.intel.com/en-us/articles/intel-sdm).
+This section assumes you know what `xsave` and `xrstor` are. If not, see Volume 1 Chapter 13 of the [Intel Developer Manuals](https://software.intel.com/en-us/articles/intel-sdm).
 
 Pre skylake, if you had a clean upper state, saving state, followed by restoring state, results in a clean upper state. Saving with a dirty upper state, and then restoring, results in entering a preserved upper state, and entering this state invokes a one time short penalty during restore, which will become dirty if a VEX encoded instruction is executed, or cleaned by a `vzeroupper/vzeroall`. Restoring state with AVX state initialized (zeroed) enters a clean state, although if it is from a dirty image or preserved upper state, it invokes a penalty.
 
