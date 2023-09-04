@@ -19,6 +19,32 @@ body {
   font-family: 'IBM Plex Sans', sans-serif;
 }
 
+.footer-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.footer-button {
+  background-color: #f1f1f1;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.footer-button a {
+  text-decoration: none;
+  font-size: 1.2em;
+  color: black;
+  display: flex;
+  align-items: center;
+}
+
+.footer-button i {
+  margin-right: 10px;
+  font-size: 1.4em;
+}
+
 code {
   font-size: 1.2em;
   padding: 0.1em 0.2em;
