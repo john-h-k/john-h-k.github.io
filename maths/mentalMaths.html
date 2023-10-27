@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Math Test</title>
+    <link rel="stylesheet" href="mentalMaths.css">
+</head>
+<body onload="initializeTest()">
+    <div class="content">
+        <div class="navbar">Mental Math Test</div>
+        <div class="center-box">
+          <div class="top-bar">
+              <span id="question-number">1/80</span>
+              <span id="timer">8:00</span>
+          </div>
+          <div class="question" id="question-display"></div>
+          <div class="answers">
+              <button class="answer" onclick="submitAnswer(0)" id="answer0"></button>
+              <button class="answer" onclick="submitAnswer(1)" id="answer1"></button>
+              <button class="answer" onclick="submitAnswer(2)" id="answer2"></button>
+              <button class="answer" onclick="submitAnswer(3)" id="answer3"></button>
+          </div>
+          <div id="score">Score: 0</div>
+        </div>
+    </div>
+
+    <script src="mentalMaths.js"></script>
+</body>
+</html>
