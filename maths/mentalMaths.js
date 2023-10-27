@@ -108,8 +108,35 @@ function formatValue(ty, value) {
 function genBadAnswers(op, ty, values) {
     let real = genAnswer(op, ty, values);
 
+    let fakes;
+
     // FIXME: better logic
-    return [real + 1, real * 10, real - 5].map(v => ({ value: formatValue(ty, v), correct: false }));
+    switch (ty) {
+        case "integer":
+            let err = real > 100 ? 0.05 : 0.2;
+            fakes = [
+                real + randInt(real * err),
+                real - randInt(real * err),
+                real - randInt(real * err)
+            ];
+            break;
+        case "decimal":
+            fakes = [
+                real + randDecimal(real * 0.05),
+                real - randDecimal(real * 0.1),
+                real - randDecimal(real * 0.1)
+            ];
+            break;
+        case "fraction":
+            // TODO:
+            fakes = [
+                real + randFn(real * 0.05),
+                real - randFn(real * 0.1),
+                real - randFn(real * 0.1)
+            ];
+            break;
+    }
+    return fakes.map(v => ({ value: formatValue(ty, v), correct: false }));
 }
 
 function genAnswer(op, ty, values) {
