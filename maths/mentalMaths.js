@@ -1,4 +1,7 @@
 
+// IMPORTANT
+// this was hacked together over a rushed lunch break - it is not elegant or very clear. but it mostly works :)
+
 let timer = 480; // 8 minutes in seconds
 let questionIndex = 0;
 let score = 0;
@@ -43,6 +46,7 @@ function generateAndDisplayQuestion() {
     }
 
     document.getElementById("question-number").innerText = `${questionIndex + 1}/80`;
+    document.getElementById("question-type").innerText = question.ty;
     questionIndex++;
 }
 
@@ -71,11 +75,7 @@ function endTest() {
 
 function genQuestion() {
     let op = pickOp();
-    let [ty, values] = pickValues();
-
-    // insert null into 0 (op1) 1 (op2) or 2 (rhs)
-    let unknown_pos = Math.floor(Math.random() * 3);
-    values.splice(unknown_pos, 0, null);
+    let [ty, values] = pickValues(op);
 
     let answers = genBadAnswers(op, ty, values);
     let answer_pos = Math.floor(Math.random() * 3);
@@ -84,6 +84,7 @@ function genQuestion() {
     answers.splice(answer_pos, 0, { value: answer, correct: true });
 
     return {
+        ty: ty,
         op1: values[0],
         op: op,
         op2: values[1],
@@ -148,25 +149,71 @@ function genAnswer(op, ty, values) {
     }
 }
 
-function pickValues() {
+function pickValues(op) {
+    let [int_max, mul_max] = randChoice([
+        [50, 50],
+        [500, 10],
+        [2000, 5]
+    ]);
+
+    let unknown_pos = Math.floor(Math.random() * 3);
     switch (Math.floor(Math.random() * 2 /* no fractions rn */)) {
-        case 0:
-            INT_MAX = 2000
-            return ["integer", [randInt(INT_MAX), randInt(INT_MAX)]];
-        case 1:
-            return ["decimal", [randDecimal(), randDecimal()]];
-        case 2:
+        case 0: {
+            let values;
+            // always solvable
+            if (op == "+" || op == "-" || (op == "*" && unknown_pos == 2) || (op == "/" && unknown_pos == 0)) {
+                values = [randInt(int_max), randInt(int_max)];
+            } else if (op == "*") {
+                // just generate second rand as multiple of first
+                v = randInt(int_max);
+                values = [v, v * randInt(mul_max)]
+            } else {
+                // either a/<unknown> = b or a/b = <unknown>
+                v = randInt(int_max);
+                values = [v * randInt(mul_max), v]
+            }
+            
+            values.splice(unknown_pos, 0, null);
+            return ["integer", values];
+        }
+        case 1: {
+            let values;
+            if (op == "+" || op == "-") {
+                values = [randDecimal(int_max), randDecimal(int_max)];
+            } else {
+                // one int 
+                values = [randInt(int_max), randDecimal(int_max)]
+                if (randBool()) {
+                    values.reverse();
+                }
+            }
+            values.splice(unknown_pos, 0, null);
+            return ["decimal", values];
+        }
+        case 2: {
             FRAC_PART_MAX = 50
-            return ["fraction", [[randInt(FRAC_PART_MAX), randInt(FRAC_PART_MAX)], [randInt(FRAC_PART_MAX), randInt(FRAC_PART_MAX)]]];
+            let values = [[randInt(FRAC_PART_MAX), randInt(FRAC_PART_MAX)], [randInt(FRAC_PART_MAX), randInt(FRAC_PART_MAX)]];
+
+            return ["fraction", values];
+        }
     }
+}
+
+function randChoice(arr) {
+    return arr[randInt(arr.length) - 1];
+}
+
+function randBool() {
+    return Math.random() < 0.5;
 }
 
 function randInt(maxVal) {
     return Math.floor(Math.random() * maxVal) + 1;
 }
 
-function randDecimal() {
-    return parseFloat((Math.random() * 2000).toFixed(3));
+function randDecimal(maxVal) {
+    let value = Math.random() * maxVal;
+    return parseFloat((value > 0 ? value.toPrecision(4) : value.toPrecision(2)));
 }
 
 function pickOp() {
