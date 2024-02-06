@@ -115,9 +115,9 @@ function genBadAnswers(op, ty, values) {
         case "integer":
             let err = real > 100 ? 0.05 : 0.2;
             fakes = [
-                real + randInt(real * err),
-                real - randInt(real * err),
-                real - randInt(real * err)
+                tryTillNotEqual((i) => real + randInt(real * err * i), real),
+                tryTillNotEqual((i) => real - randInt(real * err * i), real),
+                tryTillNotEqual((i) => real - randInt(real * err * i), real)
             ];
             break;
         case "decimal":
@@ -137,6 +137,18 @@ function genBadAnswers(op, ty, values) {
             break;
     }
     return fakes.map(v => ({ value: formatValue(ty, v), correct: false }));
+}
+
+function tryTillNotEqual(fn, val) {
+    let i = 0;
+    while (true) {
+        let v = fn(i);
+        if (v != val) {
+            return v; 
+        }
+
+        i++;
+    }
 }
 
 function genAnswer(op, ty, values) {
@@ -184,9 +196,11 @@ function pickValues(op) {
     ]);
 
     let unknown_pos = Math.floor(Math.random() * 3);
-    switch (Math.floor(Math.random() * 2 /* no fractions rn */)) {
-        case 0: {
-            let values;
+    let ty = randChoice(["integer" /* "decimal", "fraction" */]);
+
+    let values;
+    switch (ty) {
+        case "integer": {
             // always solvable
             if (op == "+" || op == "-" || (op == "*" && unknown_pos == 2) || (op == "/" && unknown_pos == 0)) {
                 values = [randInt(int_max), randInt(int_max)];
@@ -201,10 +215,9 @@ function pickValues(op) {
             }
             
             values.splice(unknown_pos, 0, null);
-            return ["integer", values];
+            break;
         }
         case 1: {
-            let values;
             if (op == "+" || op == "-") {
                 values = [randDecimal(int_max), randDecimal(int_max)];
             } else {
@@ -214,16 +227,18 @@ function pickValues(op) {
                     values.reverse();
                 }
             }
+
             values.splice(unknown_pos, 0, null);
-            return ["decimal", values];
+            break;
         }
         case 2: {
             FRAC_PART_MAX = 50
-            let values = [[randInt(FRAC_PART_MAX), randInt(FRAC_PART_MAX)], [randInt(FRAC_PART_MAX), randInt(FRAC_PART_MAX)]];
-
-            return ["fraction", values];
+            values = [[randInt(FRAC_PART_MAX), randInt(FRAC_PART_MAX)], [randInt(FRAC_PART_MAX), randInt(FRAC_PART_MAX)]];
+            break;
         }
     }
+
+    return [ty, values];
 }
 
 function randChoice(arr) {

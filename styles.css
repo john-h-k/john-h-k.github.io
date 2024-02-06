@@ -19,8 +19,42 @@ body {
   font-family: 'IBM Plex Sans', sans-serif;
 }
 
+.page-container {
+  display: flex;
+}
+
+.content {
+  display: flex;
+
+  flex: 1;
+  flex-direction: row;
+}
+
+.section {
+  flex: 1;
+  flex-direction: row;
+  border: 1px solid #ccc;
+}
+
+.blogs {
+  flex: 3 1 auto;
+}
+
+.john {
+  flex: 2 1 auto;
+}
+
+.logo {
+  padding-left: 10px;
+}
+
+p img {
+  vertical-align: middle;
+}
+
 .footer-container {
   display: flex;
+
   justify-content: center;
   gap: 20px;
   padding-bottom: 2em;
@@ -56,9 +90,12 @@ header {
 }
 
 /* Style the main content */
-main {
+.section-box {
   width: 70%;
   margin: 20px auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 20px;
 }
 
 /* Style each article */
@@ -93,39 +130,31 @@ li {
   margin: 0.3rem 0;
 }
 
-/* Table of contents styling */
-#toc {
-  margin: 20px 0;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
 /* Table of Contents Title */
-#toc h1 {
+#list h1 {
   margin-top: 0;
   font-size: 1.5em;
 }
 
 /* List Styling */
-#toc ul {
+#list ul {
   list-style: none;
   padding-left: 0;
 }
 
-#toc li {
+#list li {
   margin: 8px 0;
 }
 
 /* Links */
-#toc a {
+#list a {
   text-decoration: none;
   color: #007bff;
   font-weight: 500;
   transition: color 0.2s;
 }
 
-#toc a:hover {
+#list a:hover {
   color: #0056b3;
 }
 
@@ -140,6 +169,19 @@ pre {
 
   font-size: 1.2em;
   border-radius: 3px;
+}
+
+.company-link {
+  font-weight: 999;
+  text-decoration: none;
+}
+
+a {
+  color: #0000EE;
+}
+
+a:visited {
+  color: #0000EE;
 }
 
 .header-container {
