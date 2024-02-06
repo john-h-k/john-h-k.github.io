@@ -180,10 +180,6 @@ a {
   color: #0000EE;
 }
 
-a:visited {
-  color: #0000EE;
-}
-
 .header-container {
   display: flex;
   justify-content: center;
