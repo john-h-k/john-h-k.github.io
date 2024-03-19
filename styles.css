@@ -19,6 +19,18 @@ body {
   font-family: 'IBM Plex Sans', sans-serif;
 }
 
+.header {
+  display: flex;
+}
+
+.cv-button {
+  margin: 5px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+}
+
 .page-container {
   display: flex;
 }
