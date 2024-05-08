@@ -231,7 +231,7 @@ code {
 }
 
 pre {
-  font-family: 'Courier New', monospace;
+  font-family: 'Courier New', monospace !important; /* Override HLJS */
   border: 1px solid #ccc;      /* Border */
   overflow-x: auto;            /* Scroll bar if the code is wide */
   background-color: #f8f9fa;  /* Light gray background */
