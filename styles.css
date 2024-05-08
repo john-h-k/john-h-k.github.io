@@ -151,8 +151,8 @@ main p {
 
 article {
   background-color: #fff;
-  padding: 20px;
-  border: 1px solid #ccc;
+  padding-left: 10vw;
+  padding-right: 10vw;
 }
 
 #articles ul {
