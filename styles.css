@@ -1,4 +1,4 @@
-/********** Structure of the overall page **********/
+/********** Structure of the overall page + Borders **********/
 
 body {
   min-height: 100vh;
@@ -14,6 +14,8 @@ body {
 
 header {
   grid-area: header;
+  border-bottom: 2px solid #ccc;
+  padding: 1rem;
 }
 
 /* `display: contents` causes `main` to be ignored for the grid sizing, and is only present for accessibility */
@@ -36,8 +38,18 @@ main {
   grid-area: lspacer;
 }
 
+#rspacer {
+  grid-area: rspacer;
+}
+
+/* Using two borders of 1px (rather than one of 2px) makes sure divs are same size */
+
 #john, #lspacer {
-  border-right: 2px solid #ccc;  
+  border-right: 1px solid #ccc;  
+}
+
+#articles, #rspacer {
+  border-left: 1px solid #ccc;
 }
 
 /* Styling for article page */
@@ -50,17 +62,14 @@ article {
 
 footer {
   grid-area: footer;
+  border-top: 2px solid #ccc;
+  padding: 1rem;
 }
 
 /********** Default styling changes **********/
 
-body, h1, h2, p {
+body, h1, h2, h3, p {
   margin: 0;
-  padding: 0;
-}
-
-h1, h2, h3 {
-  padding: 0.5em 0em;
 }
 
 /* Set background and font */
@@ -92,9 +101,6 @@ header {
   text-align: center;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem;
-  margin: 0rem 1rem;
-  border-bottom: 2px solid #ccc;
 }
 
 header > :first-child {
@@ -185,11 +191,9 @@ footer {
   background-color: #fff;
   color: #333;
   text-align: center;
-  padding: 1rem;
-  border-top: 2px solid #ccc;
 }
 
-.footer-container {
+footer {
   display: flex;
   justify-content: center;
   align-items: center;
