@@ -1,3 +1,36 @@
+body {
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  grid-template:
+    "header header" auto
+    "about articles" 1fr
+    "footer footer" auto
+    / minmax(0, 1fr) minmax(0, 1fr);
+}
+
+header {
+  grid-area: header;
+}
+
+/* `display: contents` causes `main` to be ignored for the grid sizing, and is only present for accessibility */
+main {
+  display: contents;
+}
+
+footer {
+  grid-area: footer;
+}
+
+.blogs {
+  grid-area: articles;
+}
+
+.john {
+  grid-area: about;
+}
+
+
 /* Reset some browser default styles */
 body, h1, h2, p {
   margin: 0;
@@ -11,12 +44,13 @@ h1, h2, h3 {
 /* Set background and font */
 body {
   background-color: #fff;
-  /* font-family: 'Courier New', monospace; */
+  font-family: 'Courier New', monospace;
   font-family: 'IBM Plex Sans', sans-serif;
 }
 
 header {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(auto, 1fr) auto minmax(auto, 1fr);
   background-color: #fff;
   color: #333;
   text-align: center;
@@ -33,20 +67,10 @@ header h1 {
   flex-grow: 8;
 }
 
-.header > :first-child, .header > :last-child {
-  flex-grow: 1;
-  flex-basis: 0;
+header > :last-child {
+  white-space: nowrap;
+  text-align: right;
 }
-
-:header > :last-child {
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* Left align the first */
-/* header:first-child { */
-  /* flex: 1; */
-/* } */
 
 .cv-button {
   margin: 5px;
@@ -54,25 +78,6 @@ header h1 {
   justify-content: space-between;
   align-content: center;
   flex-direction: column;
-}
-
-.page-container {
-  display: flex;
-}
-
-.content {
-  display: flex;
-
-  flex: 1;
-  flex-direction: row;
-}
-
-.blogs {
-  flex: 2 1 auto;
-}
-
-.john {
-  flex: 2 1 auto;
 }
 
 .logo {
@@ -95,6 +100,8 @@ p img {
   padding: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  width: fit-content;
+  height: fit-content;
 }
 
 .footer-button a {
@@ -121,7 +128,8 @@ p img {
   width: 77.5%;
   /* min-height keeps the two boxes the same size */
   /* sometimes needs tweaking... */
-  min-height: 65%;
+  min-height: 75%;
+  max-height: 75%;
   margin: 20px auto;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -142,7 +150,8 @@ article {
 .page-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  justify-content: flex-start;
+  /* min-height: 100vh; */
 }
 
 .content {
@@ -150,7 +159,6 @@ article {
 }
 
 footer {
-  flex-shrink: 0;
   background-color: #fff;
   color: #333;
   text-align: center;
@@ -209,13 +217,6 @@ pre {
   text-decoration: none;
 }
 
-.header-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 100%;
-}
-
 .back-home {
   margin-right: 20px;
   text-decoration: none;
@@ -232,11 +233,6 @@ h1 {
   margin: 0;
   flex-grow: 1;
   text-align: center; /* center the title text */
-}
-
-.spacer {
-  flex-shrink: 0; /* prevent shrinking */
-  width: calc(1.2em + 20px + 8px); /* sum of font-size, margin-right and arrow margin */
 }
 
 .section-box p {
