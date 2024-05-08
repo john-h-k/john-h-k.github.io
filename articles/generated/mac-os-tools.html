@@ -72,19 +72,16 @@
   </script>
 </head>
 <body>
-
   <header>
-    <div class="header-container">
-      <a href="/" class="back-home">
-        <span class="arrow">&#8617;</span> Back Home
-      </a>
-      <h1>Install GNU tools for macOS</h1>
-      <div class="spacer"></div> <!-- empty spacer to balance the Back Home link -->
-    </div>
+    <a href="/" class="back-home">
+      <span class="arrow">&#8617;</span> Back Home
+    </a>
+    <h1>Install GNU tools for macOS</h1>
+    <div></div> <!-- empty div needed for 3-col header grid -->
   </header>
 
   <main>
-    <article id="article-id" class="blog-article">
+    <article>
 <p>By default, macOS has FreeBSD-based core utilities such as <code class="notranslate">date</code>, <code class="notranslate">grep</code>, and <code class="notranslate">sed</code>. While these are adequate for many tasks, they're very limited in comparison to the GNU standard utilites that you may be used to from bash, and that are often used in stackoverflow bash scripts and the like. To install the improved GNU-standard tools, run these Homebrew commands.</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">brew install coreutils <span class="pl-c"><span class="pl-c">#</span> The majority of them</span>
 brew install findutils <span class="pl-c"><span class="pl-c">#</span> find</span>
@@ -98,27 +95,25 @@ brew install gawk <span class="pl-c"><span class="pl-c">#</span> [g]awk</span></
   </main>
 
   <footer>
-    <div class="footer-container">
-      <div class="footer-button">
-        <a href="https://twitter.com/johnkdev" target="_blank">
-          <i class="fab fa-twitter"></i> johnkdev
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="https://github.com/john-h-k" target="_blank">
-          <i class="fab fa-github"></i> john-h-k
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
-          <i class="fab fa-linkedin"></i> John Kelly
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="mailto:johnharrykelly@gmail.com" target="_blank">
-          <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
-        </a>
-      </div>
+    <div class="button">
+      <a href="https://twitter.com/johnkdev" target="_blank">
+        <i class="fab fa-twitter"></i> johnkdev
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://github.com/john-h-k" target="_blank">
+        <i class="fab fa-github"></i> john-h-k
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
+        <i class="fab fa-linkedin"></i> John Kelly
+      </a>
+    </div>
+    <div class="button">
+      <a href="mailto:johnharrykelly@gmail.com" target="_blank">
+        <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
+      </a>
     </div>
   </footer>
 

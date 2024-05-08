@@ -72,19 +72,16 @@
   </script>
 </head>
 <body>
-
   <header>
-    <div class="header-container">
-      <a href="/" class="back-home">
-        <span class="arrow">&#8617;</span> Back Home
-      </a>
-      <h1>Detailed Analysis of C# `Memory<T>` and `ReadOnlyMemory<T>` Types: Inefficiencies and Hazards</h1>
-      <div class="spacer"></div> <!-- empty spacer to balance the Back Home link -->
-    </div>
+    <a href="/" class="back-home">
+      <span class="arrow">&#8617;</span> Back Home
+    </a>
+    <h1>Detailed Analysis of C# `Memory<T>` and `ReadOnlyMemory<T>` Types: Inefficiencies and Hazards</h1>
+    <div></div> <!-- empty div needed for 3-col header grid -->
   </header>
 
   <main>
-    <article id="article-id" class="blog-article">
+    <article>
 <p>Let's talk about the <code class="notranslate">Memory&lt;T&gt;</code> and <code class="notranslate">ReadOnlyMemory&lt;T&gt;</code> types. These types were introduced in C# 7.2 and are used to represent contiguous regions of memory. They are similar to <code class="notranslate">Span&lt;T&gt;</code> and <code class="notranslate">ReadOnlySpan&lt;T&gt;</code>, but designed to be heap-safe for use in asynchronous code.</p>
 <p>Yet, a careful examination of these types uncovers various inefficiencies and potential hazards. Today, we will highlight and discuss three main issues:</p>
 <ol>
@@ -114,27 +111,25 @@
   </main>
 
   <footer>
-    <div class="footer-container">
-      <div class="footer-button">
-        <a href="https://twitter.com/johnkdev" target="_blank">
-          <i class="fab fa-twitter"></i> johnkdev
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="https://github.com/john-h-k" target="_blank">
-          <i class="fab fa-github"></i> john-h-k
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
-          <i class="fab fa-linkedin"></i> John Kelly
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="mailto:johnharrykelly@gmail.com" target="_blank">
-          <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
-        </a>
-      </div>
+    <div class="button">
+      <a href="https://twitter.com/johnkdev" target="_blank">
+        <i class="fab fa-twitter"></i> johnkdev
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://github.com/john-h-k" target="_blank">
+        <i class="fab fa-github"></i> john-h-k
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
+        <i class="fab fa-linkedin"></i> John Kelly
+      </a>
+    </div>
+    <div class="button">
+      <a href="mailto:johnharrykelly@gmail.com" target="_blank">
+        <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
+      </a>
     </div>
   </footer>
 

@@ -72,19 +72,16 @@
   </script>
 </head>
 <body>
-
   <header>
-    <div class="header-container">
-      <a href="/" class="back-home">
-        <span class="arrow">&#8617;</span> Back Home
-      </a>
-      <h1>Using Touch ID for `sudo`</h1>
-      <div class="spacer"></div> <!-- empty spacer to balance the Back Home link -->
-    </div>
+    <a href="/" class="back-home">
+      <span class="arrow">&#8617;</span> Back Home
+    </a>
+    <h1>Using Touch ID for `sudo`</h1>
+    <div></div> <!-- empty div needed for 3-col header grid -->
   </header>
 
   <main>
-    <article id="article-id" class="blog-article">
+    <article>
 <p>macOS is really good at not making you use your login password. <em>Really</em> good. Keychain passwords, new device plugins, setting changes, all can be done via TouchID, which (particularly for those of us with lengthy passwords) is extremely useful. One place you can't by default use TouchID is for <code class="notranslate">sudo</code>, however it can be enabled manually.</p>
 <p><code class="notranslate">/etc/pam.d/sudo</code> is the file used to control the parameters needed to successfully use <code class="notranslate">sudo</code>.</p>
 <h3>The structure of <code class="notranslate">/etc/pam.d/sudo</code></h3>
@@ -196,27 +193,25 @@ grep -qx <span class="pl-s"><span class="pl-pds">'</span>auth\s*sufficient\s*pam
   </main>
 
   <footer>
-    <div class="footer-container">
-      <div class="footer-button">
-        <a href="https://twitter.com/johnkdev" target="_blank">
-          <i class="fab fa-twitter"></i> johnkdev
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="https://github.com/john-h-k" target="_blank">
-          <i class="fab fa-github"></i> john-h-k
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
-          <i class="fab fa-linkedin"></i> John Kelly
-        </a>
-      </div>
-      <div class="footer-button">
-        <a href="mailto:johnharrykelly@gmail.com" target="_blank">
-          <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
-        </a>
-      </div>
+    <div class="button">
+      <a href="https://twitter.com/johnkdev" target="_blank">
+        <i class="fab fa-twitter"></i> johnkdev
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://github.com/john-h-k" target="_blank">
+        <i class="fab fa-github"></i> john-h-k
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
+        <i class="fab fa-linkedin"></i> John Kelly
+      </a>
+    </div>
+    <div class="button">
+      <a href="mailto:johnharrykelly@gmail.com" target="_blank">
+        <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
+      </a>
     </div>
   </footer>
 
