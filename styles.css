@@ -28,8 +28,6 @@ header {
 }
 
 header h1 {
-  position: fixed;
-  min-width: 100%;
   text-align: center;
 }
 
