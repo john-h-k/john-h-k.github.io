@@ -230,12 +230,13 @@ footer {
 
 /********** Inline/block code styling **********/
 
-code {
+pre, tt, code, kbd, samp {
+  /* Override HLJS - needs `!important`*/
+  font-family: 'Courier New', monospace !important;
   background-color: #f8f9fa !important;  /* Light gray background */  
 }
 
 pre {
-  font-family: 'Courier New', monospace !important; /* Override HLJS */
   border: 1px solid #ccc;      /* Border */
   overflow-x: auto;            /* Scroll bar if the code is wide */
   background-color: #f8f9fa;  /* Light gray background */
