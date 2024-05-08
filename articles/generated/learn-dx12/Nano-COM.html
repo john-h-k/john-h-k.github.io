@@ -73,9 +73,11 @@
 </head>
 <body>
   <header>
-    <a href="/" class="back-home">
-      <span class="arrow">&#8617;</span> Back Home
-    </a>
+    <div class="button">
+      <a href="/">
+        <span class="arrow">&#8617;</span> Back Home
+      </a>
+    </div>
     <h1>DirectX's Nano-COM</h1>
     <div></div> <!-- empty div needed for 3-col header grid -->
   </header>
@@ -96,9 +98,9 @@
 <li><a href="#debugging-com-leaks">Debugging COM leaks</a></li>
 </ul>
 <h2>COM vs Nano-COM</h2>
-<ul>
-<li>COM stands for Component Object Model, and is a programming interface standard made by Microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like <code class="notranslate">CoCreateInstance</code> and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.</li>
-</ul>
+<blockquote>
+<p>COM stands for Component Object Model, and is a programming interface standard made by Microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like <code class="notranslate">CoCreateInstance</code> and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.</p>
+</blockquote>
 <p>DirectX uses a interface model referred to casually as "Nano-COM", which utilises the ABI (application-binary interface - a topic for another article, but basically how different programs interact on a binary level, e.g parameter passing, errors, etc), as well as the error-code model of COM.</p>
 <p>As anyone who has worked with COM or Win32 before will know, windows loves its <code class="notranslate">typedef</code>s. Not too many are essential to know, but a few are frequently used in COM code:</p>
 <ul>
@@ -234,7 +236,7 @@ pTmp-&gt;<span class="pl-en">Release</span>();</pre></div>
 <div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">define</span> <span class="pl-en">FAILED</span>(<span class="pl-v">hr</span>) (((HRESULT)(hr)) &lt; <span class="pl-c1">0</span>)
 #<span class="pl-k">define</span> <span class="pl-en">SUCCEEDED</span>(<span class="pl-v">hr</span>) (((HRESULT)(hr)) &gt;= <span class="pl-c1">0</span>)</pre></div>
 <p>There are <code class="notranslate">HRESULT_SEVERITY</code>, <code class="notranslate">HRESULT_FACILITY</code>, <code class="notranslate">HRESULT_CODE</code>, and <code class="notranslate">MAKE_HRESULT</code> macros too that are relatively self explanatory, but generally not used for DirectX.</p>
-<p>There are only 2 success codes used by DirectX:</p>
+<p>There are only two success codes used by DirectX:</p>
 <ul>
 <li><code class="notranslate">S_OK</code> - the value 0, the bog standard "yeah that worked" code</li>
 <li><code class="notranslate">S_FALSE</code> - success, but "alternative" success. Most frequently used in DirectX for <code class="notranslate">CreateXXX(...)</code> methods, where the output object (<code class="notranslate">ppvObject</code>) is <code class="notranslate">NULL</code> and so object creation is <em>tested</em> for success rather than created. In this case, <code class="notranslate">S_FALSE</code> is returned for success</li>

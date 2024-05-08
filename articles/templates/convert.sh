@@ -8,7 +8,13 @@ mkdir -p "$target_dir"
 
 echo "Reading templates from '$template_dir' and generating into '$target_dir'"
 
-for file in $(fd . "$template_dir" --extension md); do
+search_term="${1:-.}"
+
+if [ ! -z "$1" ]; then
+  echo "Searching for '$search_term'"
+fi
+
+for file in $(fd "$search_term" "$template_dir" --extension md); do
   # macOS Ventura added a new `realpath` command which doesn't support `--relative-to`
   # full_name=$(realpath --relative-to "$template_dir" -- "$file")
   # instead we use zsh param expansion

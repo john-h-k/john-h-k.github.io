@@ -76,6 +76,7 @@ body {
 body {
   background-color: #fff;
   font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 1.25em;
 }
 
 a {
@@ -230,6 +231,13 @@ footer {
 
 /********** Inline/block code styling **********/
 
+/* markdown generator will sometimes not give bulletpoints a <p> tag so we need to force the right behaviour for <li> tags */
+
+li {
+  /* display: block; */
+  margin: 1em 0em;
+}
+
 pre, tt, code, kbd, samp {
   /* Override HLJS - needs `!important`*/
   font-family: 'Courier New', monospace !important;
@@ -247,8 +255,8 @@ pre {
 
 /* Makes inline code a bit clearer */
 div code, p code, span code, li code, ul code, h1 code, h2 code, h3 code, h4 code, h5 code, h6 code {
-  font-size: 1.2em;
-  padding: 0.1em 0.2em;
+  /* font-size: 1em; */
+  padding: 0.05em 0.2em;
   background-color: #f4f4f4;
   border-radius: 3px;
 }

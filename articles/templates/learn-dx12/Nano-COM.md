@@ -15,7 +15,7 @@
 
 ## COM vs Nano-COM
 
-* COM stands for Component Object Model, and is a programming interface standard made by Microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like `CoCreateInstance` and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.
+> COM stands for Component Object Model, and is a programming interface standard made by Microsoft. It is complex and extends massively beyond what is relevant to DirectX, and we won't cover advanced COM topics (like `CoCreateInstance` and COM servers) here as they are irrelevant to DirectX. However, a solid understanding of nano-COM is essential to writing good DirectX code.
 
 DirectX uses a interface model referred to casually as "Nano-COM", which utilises the ABI (application-binary interface - a topic for another article, but basically how different programs interact on a binary level, e.g parameter passing, errors, etc), as well as the error-code model of COM.
 
@@ -238,7 +238,7 @@ A `HRESULT` has 3 elements - a severity (error or success), a facility (where it
 
 There are `HRESULT_SEVERITY`, `HRESULT_FACILITY`, `HRESULT_CODE`, and `MAKE_HRESULT` macros too that are relatively self explanatory, but generally not used for DirectX.
 
-There are only 2 success codes used by DirectX:
+There are only two success codes used by DirectX:
 
 * `S_OK` - the value 0, the bog standard "yeah that worked" code
 * `S_FALSE` - success, but "alternative" success. Most frequently used in DirectX for `CreateXXX(...)` methods, where the output object (`ppvObject`) is `NULL` and so object creation is *tested* for success rather than created. In this case, `S_FALSE` is returned for success
