@@ -215,7 +215,7 @@ footer {
   height: fit-content;
 }
 
-.button a {
+.button > a {
   text-decoration: none;
   font-size: 1.2em;
   color: black;
@@ -223,7 +223,7 @@ footer {
   align-items: center;
 }
 
-.button i {
+.button > a > * {
   margin-right: 10px;
   font-size: 1.4em;
 }
