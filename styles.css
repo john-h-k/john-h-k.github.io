@@ -75,7 +75,6 @@ body, h1, h2, h3, p {
 /* Set background and font */
 body {
   background-color: #fff;
-  font-family: 'Courier New', monospace;
   font-family: 'IBM Plex Sans', sans-serif;
 }
 
@@ -233,6 +232,7 @@ code {
 }
 
 pre {
+  font-family: 'Courier New', monospace;
   border: 1px solid #ccc;      /* Border */
   overflow-x: auto;            /* Scroll bar if the code is wide */
   background-color: #f8f9fa;  /* Light gray background */
