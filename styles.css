@@ -14,16 +14,16 @@ body {
 
 @media(max-width: 480px) {
   html {
-    font-size: 0.5em;
+    font-size: 0.675em;
   }
 
   body {
     max-width: 100dvw;
     grid-template:
       "header header" fit-content(100%)
-      "about about" auto
-      "articles articles" auto
-      "lspacer rspacer" 0 /* these prevent the about/articles blocks filling the page */
+      "about about" fit-content(100%)
+      "articles articles" fit-content(100%)
+      "lspacer rspacer" auto
       "footer footer" fit-content(100%)
       / minmax(0, 1fr) minmax(0, 1fr);
   }
@@ -123,12 +123,6 @@ header {
   justify-content: space-between;
 }
 
-@media(max-width: 480px) {
-  header {
-    grid-template-columns: auto auto 0;
-  }
-}
-
 header h1 {
   margin: 0;
 }
@@ -169,6 +163,10 @@ header .arrow {
 
 /* sections are vertical in mobile so no need for padding horizontally */
 @media(max-width: 480px) {
+  .section-box {
+    height: fit-content;
+  }
+
   .section {
     padding-left: 0em;
     padding-right: 0em;
