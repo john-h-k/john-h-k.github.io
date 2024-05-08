@@ -150,8 +150,7 @@ main p {
 
 article {
   background-color: #fff;
-  padding-left: 10vw;
-  padding-right: 10vw;
+  padding: 7.5vh 10vw;
 }
 
 #articles ul {
