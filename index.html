@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <header class="header">
+  <header>
     <div class="button">
       <a href="./cv" target="_blank">
         <i class="fas fa-file"></i> See my CV
@@ -18,7 +18,7 @@
   </header>
 
   <main>
-    <div class="section john">
+    <div id="john" class="section">
       <div class="section-box">
         <h1>About Me</h1>
         <table>
@@ -39,7 +39,7 @@
           <tr>
             <td>
               <p>
-                Incoming Software Engineer Intern at <a class="company-link" href="https://mwam.com">Marshall Wace</a> (2024)
+                Incoming Software Engineer Intern at <a href="https://mwam.com">Marshall Wace</a> (2024)
               </p>
             </td>
             <td>
@@ -49,7 +49,7 @@
           <tr>
             <td>
               <p>
-                Software Engineer at <a class="company-link" href="https://herohealthsoftware.net">Hero Health Software</a> (2022-2023)
+                Software Engineer at <a href="https://herohealthsoftware.net">Hero Health Software</a> (2022-2023)
               </p>
             </td>
             </td>
@@ -60,7 +60,7 @@
             <tr>
             <td>
               <p>
-                Software Engineer Intern at <a class="company-link" href="https://herohealthsoftware.net">Hero Health Software</a> (2021)
+                Software Engineer Intern at <a href="https://herohealthsoftware.net">Hero Health Software</a> (2021)
               </p>
             </td>
             <td>
@@ -70,11 +70,11 @@
         </table>
       </div>
     </div>
-    <div class="section articles">
+    <div id="articles" class="section">
       <div class="section-box">
         <h1>Articles</h1>
-        <section id="articles" class="list-container">
-          <ul class="list-list">
+        <section>
+          <ul>
             <li><a href="assets/jcc.pdf">JCC C Compiler Architecture</a></li>
             <li><a href="articles/generated/fix-safari-twitter.html">Fixing Twitter on Safari</a></li>
             <li><a href="articles/generated/touch-id-sudo.html">Use TouchID for <code>sudo</code></a></li>
@@ -87,6 +87,7 @@
         </section>
       </div>
     </div>
+    <div id="lspacer" /> <!-- we need this for making the border -->
   </main>
 
   <footer>

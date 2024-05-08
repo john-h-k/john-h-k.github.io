@@ -6,7 +6,8 @@ body {
   display: grid;
   grid-template:
     "header header" auto
-    "about articles" 1fr
+    "about articles" auto
+    "lspacer rspacer" 1fr /* these prevent the about/articles blocks filling the page */
     "footer footer" auto
     / minmax(0, 1fr) minmax(0, 1fr);
 }
@@ -20,16 +21,35 @@ main {
   display: contents;
 }
 
-footer {
-  grid-area: footer;
-}
 
-.articles {
+/* Styling for home page */
+
+#articles {
   grid-area: articles;
 }
 
-.john {
+#john {
   grid-area: about;
+}
+
+#lspacer {
+  grid-area: lspacer;
+}
+
+#john, #lspacer {
+  border-right: 2px solid #ccc;  
+}
+
+/* Styling for article page */
+
+article {
+  grid-area: about / about / rspacer / rspacer;
+}
+
+/* */
+
+footer {
+  grid-area: footer;
 }
 
 /********** Default styling changes **********/
@@ -50,6 +70,16 @@ body {
   font-family: 'IBM Plex Sans', sans-serif;
 }
 
+a {
+  text-decoration: none;
+  color: #007bff; /* #0000EE is also nice, and darker */
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #0056b3;
+}
+
 /********** Header bar **********/
 
 /* we use grid layout because it makes proper centering easiest */
@@ -62,7 +92,9 @@ header {
   text-align: center;
   align-items: center;
   justify-content: space-between;
-  margin: 0.5rem 1rem;
+  padding: 0.5rem;
+  margin: 0rem 1rem;
+  border-bottom: 2px solid #ccc;
 }
 
 header > :first-child {
@@ -75,7 +107,7 @@ header > :last-child {
   text-align: right;
 }
 
-.back-home {
+header .back-home {
   margin-right: 20px;
   text-decoration: none;
   color: black;
@@ -83,31 +115,20 @@ header > :last-child {
   flex-shrink: 0; /* prevent shrinking */
 }
 
-.arrow {
+header .arrow {
   margin-right: 8px;
 }
 
+/********** Main content - home page **********/
 
-/********** Main content **********/
-
-h1 {
-  text-align: center; /* center the title text */
+main h1 {
+  text-align: center;
+  padding: 0em;
+  padding-bottom: 0.5em;
 }
 
-
-.logo {
-  padding-left: 10px;
-}
-
-p img {
-  vertical-align: middle;
-}
-
-.section {
-  flex: 1;
-  flex-direction: row;
-  border: 1px solid #ccc;
-  border-top: 2px solid #ccc;
+main p {
+  margin: 0.25em;
 }
 
 .section-box {
@@ -122,51 +143,40 @@ p img {
   padding: 20px;
 }
 
-.section-box h1 {
-  padding: 0em;
-  padding-bottom: 0.5em;
-}
-
 article {
   background-color: #fff;
   padding: 20px;
   border: 1px solid #ccc;
 }
 
-#list ul {
+#articles ul {
   list-style: none;
   padding: 0em;
   margin: 0em;
 }
 
-#list li {
+#articles li {
   /* this 9px margin is carefully picked to make the top line of `About Me` at same pos as top line of `Articles` */
   margin: 9px 0 0.75em 0;
 }
 
-#list a:hover {
-  color: #0056b3;
+#articles a {
+  font-weight: 500;
 }
 
-.company-link {
+#john a {
   font-weight: 999;
-  text-decoration: none;
 }
 
-.section-box p {
-  margin: 0.25em;
-}
-
-img {
+#john img {
   padding: 0em 0em;
 }
 
-a {
-  text-decoration: none;
-  color: #007bff; /* #0000EE is also nice, and darker */
-  font-weight: 500;
-  transition: color 0.2s;
+#john .logo {
+  padding-left: 10px;
 }
+
+/********** Main content - articles **********/
 
 
 /********** Footer bar **********/
@@ -176,7 +186,7 @@ footer {
   color: #333;
   text-align: center;
   padding: 1rem;
-  border-top: 1px solid #ccc;
+  border-top: 2px solid #ccc;
 }
 
 .footer-container {
