@@ -8,10 +8,6 @@ h1, h2, h3 {
   padding: 0.5em 0em;
 }
 
-img {
-  padding: 1em 0em;
-}
-
 /* Set background and font */
 body {
   background-color: #fff;
@@ -24,18 +20,38 @@ header {
   background-color: #fff;
   color: #333;
   text-align: center;
-  margin: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.5rem 1rem;
 }
 
+/* This always puts the header dead-centered regardless of other members (the back button and the "See my CV" button) */
 header h1 {
-  text-align: center;
+  /* position: absolute; */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
+  flex-grow: 8;
 }
+
+.header > :first-child, .header > :last-child {
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+:header > :last-child {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Left align the first */
+/* header:first-child { */
+  /* flex: 1; */
+/* } */
 
 .cv-button {
-  z-index: 1; /* Place button on top of header, so they can size independently but it is still clickable */
   margin: 5px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-content: center;
   flex-direction: column;
 }
@@ -49,13 +65,6 @@ header h1 {
 
   flex: 1;
   flex-direction: row;
-}
-
-.section {
-  flex: 1;
-  flex-direction: row;
-  border: 1px solid #ccc;
-  border-top: 2px solid #ccc;
 }
 
 .blogs {
@@ -76,10 +85,9 @@ p img {
 
 .footer-container {
   display: flex;
-
   justify-content: center;
+  align-items: center;
   gap: 20px;
-  padding-bottom: 2em;
 }
 
 .footer-button {
@@ -102,17 +110,31 @@ p img {
   font-size: 1.4em;
 }
 
+.section {
+  flex: 1;
+  flex-direction: row;
+  border: 1px solid #ccc;
+  border-top: 2px solid #ccc;
+}
+
 .section-box {
-  width: 70%;
+  width: 77.5%;
+  /* min-height keeps the two boxes the same size */
+  /* sometimes needs tweaking... */
+  min-height: 65%;
   margin: 20px auto;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 20px;
 }
 
+.section-box h1 {
+  padding: 0em;
+  padding-bottom: 0.5em;
+}
+
 article {
   background-color: #fff;
-  margin: 20px 0;
   padding: 20px;
   border: 1px solid #ccc;
 }
@@ -136,30 +158,34 @@ footer {
   border-top: 1px solid #ccc;
 }
 
-li {
-  margin: 0.3rem 0;
-}
-
-#list h1 {
-  margin-top: 0;
-  font-size: 1.5em;
-}
+/* #list h1 { */
+  /* margin-top: 0; */
+  /* font-size: 1.5em; */
+/* } */
 
 #list ul {
   list-style: none;
-  padding-left: 0;
+  padding: 0em;
+  margin: 0em;
 }
 
 #list li {
-  margin: 8px 0;
+  /* this 9px margin is carefully picked to make the top line of `About Me` at same pos as top line of `Articles` */
+  margin: 9px 0 0.75em 0;
 }
 
-#list a {
+a {
   text-decoration: none;
+  /* color: #007bff; */
   color: #007bff;
   font-weight: 500;
   transition: color 0.2s;
 }
+
+/* a { */
+  /* color: #0000EE; */
+/* } */
+
 
 #list a:hover {
   color: #0056b3;
@@ -181,10 +207,6 @@ pre {
 .company-link {
   font-weight: 999;
   text-decoration: none;
-}
-
-a {
-  color: #0000EE;
 }
 
 .header-container {
@@ -217,8 +239,12 @@ h1 {
   width: calc(1.2em + 20px + 8px); /* sum of font-size, margin-right and arrow margin */
 }
 
-p {
-  margin: 0.2em;
+.section-box p {
+  margin: 0.25em;
+}
+
+img {
+  padding: 0em 0em;
 }
 
 /* Makes inline code a bit clearer */
