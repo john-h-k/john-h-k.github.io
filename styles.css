@@ -132,12 +132,10 @@ header .arrow {
 /********** Main content - home page **********/
 
 .section-box {
+  box-sizing: border-box;
+  height: 100%;
   width: 77.5%;
-  /* min-height keeps the two boxes the same size */
-  /* sometimes needs tweaking... */
-  min-height: 75%;
-  max-height: 75%;
-  margin: 20px auto;
+  margin: 20px auto 0px auto;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 20px;
