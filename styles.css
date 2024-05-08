@@ -68,7 +68,7 @@ footer {
 
 /********** Default styling changes **********/
 
-body, h1, h2, h3, p {
+body {
   margin: 0;
 }
 
@@ -102,6 +102,10 @@ header {
   justify-content: space-between;
 }
 
+header h1 {
+  margin: 0;
+}
+
 header > :first-child {
   white-space: nowrap;
   text-align: left;
@@ -126,16 +130,6 @@ header .arrow {
 
 /********** Main content - home page **********/
 
-main h1 {
-  text-align: center;
-  padding: 0em;
-  padding-bottom: 0.5em;
-}
-
-main p {
-  margin: 0.25em;
-}
-
 .section-box {
   width: 77.5%;
   /* min-height keeps the two boxes the same size */
@@ -148,9 +142,15 @@ main p {
   padding: 20px;
 }
 
-article {
-  background-color: #fff;
-  padding: 7.5vh 10vw;
+.section h1 {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 0.5em;
+}
+
+.section p {
+  margin: 0.25em;
 }
 
 #articles ul {
@@ -182,6 +182,10 @@ article {
 
 /********** Main content - articles **********/
 
+article {
+  background-color: #fff;
+  padding: 7.5vh 10vw;
+}
 
 /********** Footer bar **********/
 
