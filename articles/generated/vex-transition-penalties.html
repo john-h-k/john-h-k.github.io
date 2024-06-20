@@ -87,9 +87,6 @@
   <main>
     <article>
 <p>You might have heard of AVX to SSE transition penalties, or VEX encoding, or seen some assembly with a lot of "v"s in front of instructions and been mildly confused by it. Hopefully, this post can help clear these concepts up - what they are, why they matter to you (or don't, hopefully), and why they are significant.</p>
-<p>My twitter: <a href="https://twitter.com/johnkdev" rel="nofollow">https://twitter.com/johnkdev</a></p>
-<p>My github: <a href="https://github.com/john-h-k">https://github.com/john-h-k</a></p>
-<p>Contact me at <a href="johnkellyoxford@gmail.com">johnkellyoxford@gmail.com</a></p>
 <h2>A brief primer on SSE and AVX</h2>
 <p>Your CPU has a cool ability to do a thing called SIMD (Single Instruction Multiple Data) operations. These, as the name suggest, are instructions on your CPU which can perform an operation on multiple pieces of data at once, as opposed to SISD (Single Instruction Single Data). SISD is also known as scalar code, and SIMD as vector code. You'll hear these terms frequently.</p>
 <p>An example of SISD is a normal x64 addition:</p>

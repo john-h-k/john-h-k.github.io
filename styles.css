@@ -1,3 +1,13 @@
+@font-face {
+    font-family: "Berkeley Mono";
+    src: url("assets/BerkeleyMonoTrial-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Univers";
+    src: url("assets/UniversRegular.ttf") format("truetype");
+}
+
 /********** Structure of the overall page + Borders **********/
 
 body {
@@ -95,7 +105,7 @@ body {
 /* Set background and font */
 body {
   background-color: #fff;
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: 'Univers', 'IBM Plex Sans', sans-serif;
   font-size: 1em;
 }
 
@@ -282,7 +292,7 @@ li {
 
 pre, tt, code, kbd, samp {
   /* Override HLJS - needs `!important`*/
-  font-family: 'Courier New', monospace !important;
+  font-family: 'Berkeley Mono', 'Courier New', monospace !important;
   background-color: #f8f9fa !important;  /* Light gray background */  
 }
 
