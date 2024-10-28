@@ -59,10 +59,6 @@ main {
   grid-area: rspacer;
 }
 
-#button-sym {
-  font-size: 1.2em;
-}
-
 /* Using two borders of 1px (rather than one of 2px) makes sure divs are same size */
 
 @media not (max-width: 480px) {
@@ -129,6 +125,7 @@ header {
 
 header h1 {
   margin: 0;
+  font-weight: 500;
 }
 
 header > :first-child {
@@ -273,6 +270,7 @@ footer {
 .button > a > * {
   margin-right: 0.625em;
   font-size: 1.4em;
+  line-height: 1em;
 }
 
 /********** Inline/block code styling **********/
