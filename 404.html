@@ -22,6 +22,8 @@
       .then(response => {
         if (response.ok) {
           window.location.href = url;
+        } else {
+          window.location.pathname = "/not_found.html";
         }
       })
       .catch(error => {
