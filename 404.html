@@ -17,8 +17,9 @@
     document.addEventListener("DOMContentLoaded", function () {
       // this might be dangerous....
       const url = `https://github.com/john-h-k${window.location.pathname}`;
+      const api_url = `https://api.github.com/repos/john-h-k${window.location.pathname}`;
 
-      fetch(url, { method: "HEAD" })
+      fetch(api_url, { method: "HEAD" })
         .then(response => {
           if (response.ok) {
             window.location.href = url;
