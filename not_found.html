@@ -3,7 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>John's Blog</title>
+  <title>John's Blog - 404</title>
   <link rel="stylesheet" type="text/css" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -12,22 +12,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://johnk.dev" />
   <meta property="og:description" content="A site for my projects, articles, and other bits" />
-  <title>Loading...</title>
-  <script>
-    // this might be dangerous....
-    const url = `https://github.com/john-h-k${window.location.pathname}`;
-    const api_url = `https://api.github.com/repos/john-h-k${window.location.pathname}`;
-
-    fetch(api_url, { method: "HEAD" })
-      .then(response => {
-        if (response.ok) {
-          window.location.href = url;
-        }
-      })
-      .catch(error => {
-          window.location.pathname = "/not_found.html";
-      });
-  </script>
+  <title>404 Not Found</title>
 </head>
 <body>
   <header>
@@ -41,14 +26,9 @@
   </header>
 
   <main>
-    <div class="loading">
-      <div class="lds-ring">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-      </div>
-    </div>
+    <article>
+      Do not venture further...
+    </article>
   </main>
 
   <footer>
@@ -75,4 +55,5 @@
   </footer>
 </body>
 </html>
+
 
