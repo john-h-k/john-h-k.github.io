@@ -14,21 +14,19 @@
   <meta property="og:description" content="A site for my projects, articles, and other bits" />
   <title>404 Not Found</title>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // this might be dangerous....
-      const url = `https://github.com/john-h-k${window.location.pathname}`;
-      const api_url = `https://api.github.com/repos/john-h-k${window.location.pathname}`;
+    // this might be dangerous....
+    const url = `https://github.com/john-h-k${window.location.pathname}`;
+    const api_url = `https://api.github.com/repos/john-h-k${window.location.pathname}`;
 
-      fetch(api_url, { method: "HEAD" })
-        .then(response => {
-          if (response.ok) {
-            window.location.href = url;
-          }
-        })
-        .catch(error => {
-          console.error("Repo did not exist, showing 404", error);
-        });
-    });
+    fetch(api_url, { method: "HEAD" })
+      .then(response => {
+        if (response.ok) {
+          window.location.href = url;
+        }
+      })
+      .catch(error => {
+        console.error("Repo did not exist, showing 404", error);
+      });
   </script>
 </head>
 <body>
