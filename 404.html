@@ -18,7 +18,7 @@
       // this might be dangerous....
       const url = `https://github.com/john-h-k${window.location.pathname}`;
 
-      fetch(url, { method: "HEAD", mode: 'no-cors' })
+      fetch(url, { method: "HEAD" })
         .then(response => {
           if (response.ok) {
             window.location.href = url;
