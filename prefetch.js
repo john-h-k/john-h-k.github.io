@@ -1,3 +1,5 @@
+console.log("Prefetch enabled")
+
 const links = document.querySelectorAll('a');
 
 links.forEach(anchor => {
