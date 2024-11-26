@@ -35,9 +35,9 @@
           const branch = data.default_branch;
 
           if (file && branch) {
-            window.location.pathname = `${url}/blob/${branch}/${file}`;
+            window.location.href = `${url}/blob/${branch}/${file}`;
           } else {
-            window.location.pathname = url;
+            window.location.href = url;
           }
         } else {
           window.location.pathname = "/not_found.html";
