@@ -23,7 +23,7 @@
     const [repo, ...parts] = path.split("/");
     const file = parts.length ? parts.join("/") : null;
 
-    const url = `https://github.com/john-h-k/${}`;
+    const url = `https://github.com/john-h-k/${repo}`;
     const api_url = `https://api.github.com/repos/john-h-k/${repo}`;
 
     fetch(api_url, { method: "GET" })
