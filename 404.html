@@ -26,6 +26,7 @@
     const url = `https://github.com/john-h-k/${repo}`;
     const api_url = `https://api.github.com/repos/john-h-k/${repo}`;
 
+    console.log("START");
     fetch(api_url, { method: "GET" })
       .then(async response => {
         if (response.ok) {
@@ -34,6 +35,8 @@
           const data = await response.json();
           const branch = data.default_branch;
 
+          console.log("DONE");
+          return;
           if (file && branch) {
             window.location.href = `${url}/blob/${branch}/${file}`;
           } else {
