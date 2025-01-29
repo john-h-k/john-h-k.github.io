@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    canvas {
+      border: 1px solid #ccc;
+      cursor: crosshair;
+    }
+    button {
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="drawArea" width="600" height="400"></canvas>
+<br/>
+<button id="findSquaresBtn">find squares</button>
+
+<script>
+const EPS = 5;
+const MIN_SIDE = 15;
+const canvas = document.getElementById('drawArea');
+const ctx = canvas.getContext('2d');
+let isDrawing = false;
+let points = [];
+
+function getMousePos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+canvas.addEventListener('mousedown', e => {
+  isDrawing = true;
+  points.push(getMousePos(e));
+});
+
+canvas.addEventListener('mousemove', e => {
+  if (!isDrawing) return;
+  const a = points[points.length - 1];
+  const b = getMousePos(e);
+  points.push(b);
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.stroke();
+});
+
+canvas.addEventListener('mouseup', () => {
+  isDrawing = false;
+});
+
+function dist(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+// rotate (dx, dy) by 90 deg ccw -> (-dy, dx)
+function rotate90(dx, dy) {
+  return { x: -dy, y: dx };
+}
+
+// store points in a quick lookup by rounding
+let lookup;
+function buildLookup() {
+  lookup = new Map();
+  for (const p of points) {
+    const key = keyFor(p.x, p.y);
+    if (!lookup.has(key)) lookup.set(key, []);
+    lookup.get(key).push(p);
+  }
+}
+
+function keyFor(x, y) {
+  return Math.round(x) + ',' + Math.round(y);
+}
+
+// find a real point near (x,y) within EPS
+function findNearby(x, y) {
+  const rx = Math.round(x), ry = Math.round(y);
+  const candidates = [];
+  for (let i = rx-1; i <= rx+1; i++) {
+    for (let j = ry-1; j <= ry+1; j++) {
+      const arr = lookup.get(i+','+j);
+      if (arr) candidates.push(...arr);
+    }
+  }
+  let best = null, bestD = Infinity;
+  for (const c of candidates) {
+    const d = dist(c,{x,y});
+    if (d < bestD) { bestD = d; best = c; }
+  }
+  if (bestD <= EPS) return best;
+  return null;
+}
+
+document.getElementById('findSquaresBtn').addEventListener('click', () => {
+  ctx.strokeStyle = 'red';
+  buildLookup();
+  // for each pair of distinct points (p,q), compute the other corners if side >= MIN_SIDE
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i+1; j < points.length; j++) {
+      const p = points[i], q = points[j];
+      const dx = q.x - p.x, dy = q.y - p.y;
+      const sideLen = Math.hypot(dx, dy);
+      if (sideLen < MIN_SIDE) continue; // skip if side is too short
+
+      const r90 = rotate90(dx, dy);
+      // compute the other corners
+      const p2 = {x: p.x + r90.x, y: p.y + r90.y};
+      const q2 = {x: q.x + r90.x, y: q.y + r90.y};
+      const pFound = findNearby(p2.x, p2.y);
+      const qFound = findNearby(q2.x, q2.y);
+      if (pFound && qFound) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.lineTo(qFound.x, qFound.y);
+        ctx.lineTo(pFound.x, pFound.y);
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // also rotate the other way
+      const r90b = rotate90(-dx, -dy);
+      const p3 = {x: p.x + r90b.x, y: p.y + r90b.y};
+      const q3 = {x: q.x + r90b.x, y: q.y + r90b.y};
+      const pFound2 = findNearby(p3.x, p3.y);
+      const qFound2 = findNearby(q3.x, q3.y);
+      if (pFound2 && qFound2) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.lineTo(qFound2.x, qFound2.y);
+        ctx.lineTo(pFound2.x, pFound2.y);
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.strokeStyle = 'black';
+});
+</script>
+</body>
+</html>
