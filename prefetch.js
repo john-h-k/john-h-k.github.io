@@ -1,16 +1,11 @@
 console.log("prefetch enabled");
 
-const links = document.querySelectorAll('a');
+const links = document.querySelectorAll('.prefetch');
 
 links.forEach(anchor => {
-  // temp disabled; may be interfering with indexing
-  return;
-
   const href = anchor.getAttribute('href');
 
   if (href && !href.startsWith("mailto") && !href.startsWith("http")) {
-    console.log(`prefetching '${href}'`);
-
     const linkElement = document.createElement('link');
     linkElement.rel = 'prefetch';
     linkElement.href = href;
