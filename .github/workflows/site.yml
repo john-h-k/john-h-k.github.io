@@ -28,12 +28,13 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Download action
-        uses: actions/checkout@v4
-        with:
-          repository: john-h-k/john-site
-          path: john-site
+      - name: Clone john-site into /tmp/john-site
+        run: git clone https://github.com/john-h-k/john-site.git /tmp/john-site
       - name: Build
+        uses: /tmp/john-site
+        with:
+          source: .
+          destination: ./_site
         uses: ./john-site
         with:
           source: .
