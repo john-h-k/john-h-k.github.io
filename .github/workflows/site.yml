@@ -26,14 +26,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        working-directory: ./repo
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Clone john-site into /tmp/john-site
-        run: git clone https://github.com/john-h-k/john-site.git ${{ runner.temp }}/john-site
-      - name: Build
-        uses: ${{ runner.temp }}/john-site
+      - name: Download action
+        uses: actions/checkout@v4
         with:
-          source: .
+          repository: john-h-k/john-site
+          path: john-site
+      - name: Build
+        uses: ./john-site
+        with:
+          source: ./repo
           destination: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
