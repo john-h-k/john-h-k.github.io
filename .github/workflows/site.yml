@@ -23,14 +23,17 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./repo
     steps:
       - name: Checkout
-        working-directory: ./repo
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Download action
         uses: actions/checkout@v4
+        working-directory: .
         with:
           repository: john-h-k/john-site
           path: john-site
