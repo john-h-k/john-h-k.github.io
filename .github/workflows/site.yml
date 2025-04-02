@@ -33,13 +33,14 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Download action
         uses: actions/checkout@v4
-        working-directory: .
         with:
+          working-directory: .
           repository: john-h-k/john-site
           path: john-site
       - name: Build
         uses: ./john-site
         with:
+          working-directory: .
           source: ./repo
           destination: ./_site
       - name: Upload artifact
