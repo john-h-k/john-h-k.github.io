@@ -29,9 +29,9 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Clone john-site into /tmp/john-site
-        run: mkdir -p /tmp/john-site && git clone https://github.com/john-h-k/john-site.git /tmp/john-site
+        run: git clone https://github.com/john-h-k/john-site.git ${{ runner.temp }}/john-site
       - name: Build
-        uses: /tmp/john-site
+        uses: ${{ runner.temp }}/john-site
         with:
           source: .
           destination: ./_site
