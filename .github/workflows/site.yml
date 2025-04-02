@@ -38,8 +38,8 @@ jobs:
       - name: Build
         uses: ./john-site
         with:
-          source: ../repo
-          destination: ../_site
+          source: ./repo
+          destination: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
