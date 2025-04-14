@@ -1,5 +1,7 @@
 # AVX -> SSE transition penalties, VEX encoding, and why they matter
 
+> 01/05/2020
+
 You might have heard of AVX to SSE transition penalties, or VEX encoding, or seen some assembly with a lot of "v"s in front of instructions and been mildly confused by it. Hopefully, this post can help clear these concepts up - what they are, why they matter to you (or don't, hopefully), and why they are significant.
 
 ## A brief primer on SSE and AVX
