@@ -16,62 +16,68 @@
   <script type="module" async>
     // this might be dangerous....
     let path = window.location.pathname;
-    if (path[0] == "/") {
-      path = path.substring(1);
-    }
 
-    const [repo, ...parts] = path.split("/");
-    const file = parts.length ? parts.join("/") : null;
+    if (path.contains("generated")) {
+      path = path.replace("generated/", "");
+      window.location.href = url;
+    } else {
+      if (path[0] == "/") {
+        path = path.substring(1);
+      }
 
-    const url = `https://github.com/john-h-k/${repo}`;
-    const api_url = `https://api.github.com/repos/john-h-k/${repo}`;
+      const [repo, ...parts] = path.split("/");
+      const file = parts.length ? parts.join("/") : null;
 
-    const is_firefox = navigator.userAgent.toLowerCase().includes("firefox");
+      const url = `https://github.com/john-h-k/${repo}`;
+      const api_url = `https://api.github.com/repos/john-h-k/${repo}`;
 
-    if (repo.trim() != "") {
-      if (is_firefox) {
-        const main = document.querySelector(".loading");
-        main.innerHTML = "";
+      const is_firefox = navigator.userAgent.toLowerCase().includes("firefox");
 
-        const notice = document.createElement("div");
-        notice.style.cssText = `
-          color: #000;
-          padding: 15px;
-          border-radius: 8px;
-          text-align: center;
-          font-weight: 600;
-          font-size: 1rem;
-          margin: 20px;
-        `;
-        notice.innerHTML = `
-          <p>Firefox detected! If the redirect fails, click <a href="#" id="redir" style="color: #000; text-decoration: underline;">here</a>.</p>
-        `;
-        main.prepend(notice);
+      if (repo.trim() != "") {
+        if (is_firefox) {
+          const main = document.querySelector(".loading");
+          main.innerHTML = "";
 
-        document.addEventListener("DOMContentLoaded", () => {
-          document.getElementById("redir").href = url;
-        });
-      } else {
-        fetch(api_url, { method: "GET" })
-          .then(async response => {
-            if (response.ok) {
-              window.location.href = url;
+          const notice = document.createElement("div");
+          notice.style.cssText = `
+            color: #000;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+            margin: 20px;
+          `;
+          notice.innerHTML = `
+            <p>Firefox detected! If the redirect fails, click <a href="#" id="redir" style="color: #000; text-decoration: underline;">here</a>.</p>
+          `;
+          main.prepend(notice);
 
-              const data = await response.json();
-              const branch = data.default_branch;
-
-              if (file && branch) {
-                window.location.href = `${url}/blob/${branch}/${file}`;
-              } else {
-                window.location.href = url;
-              }
-            } else {
-              window.location.pathname = "/not_found.html";
-            }
-          })
-          .catch(error => {
-              window.location.pathname = "/not_found.html";
+          document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("redir").href = url;
           });
+        } else {
+          fetch(api_url, { method: "GET" })
+            .then(async response => {
+              if (response.ok) {
+                window.location.href = url;
+
+                const data = await response.json();
+                const branch = data.default_branch;
+
+                if (file && branch) {
+                  window.location.href = `${url}/blob/${branch}/${file}`;
+                } else {
+                  window.location.href = url;
+                }
+              } else {
+                window.location.pathname = "/not_found.html";
+              }
+            })
+            .catch(error => {
+                window.location.pathname = "/not_found.html";
+            });
+        }
       }
     }
   </script>
