@@ -18,7 +18,7 @@
     let path = window.location.pathname;
 
     if (path.contains("generated")) {
-      path = path.replace("generated/", "");
+      path = path.replace("generated/", "articles/");
       window.location.href = url;
     } else {
       if (path[0] == "/") {
