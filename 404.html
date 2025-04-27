@@ -20,7 +20,7 @@
     // HACK: redir this path from my linkedin lol
     if (path.includes("command_buffer")) {
       path = path.replace("command_buffer", "articles/command_buffer");
-      window.location.href = url;
+      window.location.pathname = path;
     } else {
       if (path[0] == "/") {
         path = path.substring(1);
