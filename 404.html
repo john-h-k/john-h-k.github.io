@@ -18,9 +18,8 @@
     let path = window.location.pathname;
 
     // HACK: redir this path from my linkedin lol
-    if (path.includes("command_buffer")) {
-      path = path.replace("command_buffer", "articles/command-buffer");
-      window.location.pathname = path;
+    if (path == "/command_buffer.html")) {
+      window.location.pathname = "/articles/command-buffer.html";
     } else {
       if (path[0] == "/") {
         path = path.substring(1);
