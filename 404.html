@@ -20,9 +20,9 @@
     if (path == "/command_buffer.html") {
       // HACK: redir this path from my linkedin lol
       window.location.pathname = "/articles/command-buffer.html";
-    } else if (path.starts_with"/articles/generated/") {
+    } else if (path.startsWith("/articles/generated/")) {
       // HACK: redir this path for wikipedia
-      window.location.pathname = path.slice("/articles/generated/".length);
+      window.location.pathname = "/articles/" + path.slice("/articles/generated/".length);
     } else {
       if (path[0] == "/") {
         path = path.substring(1);
