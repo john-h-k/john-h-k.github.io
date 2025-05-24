@@ -325,13 +325,19 @@ blockquote p {
   display: inline;  /* To keep quote symbol and text together */
 }
 
+/* Fixes safari font-weight: bold */
+
+* {
+  font-synthesis: none !important;
+}
+
 #events-container {
   margin-top: 1em;
 }
 
 #result {
   margin-bottom: 0.5em;
-  font-weight:bold;
+  font-weight: bold;
 }
 
 .loading {
