@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>John's Blog</title>
+  <link rel="stylesheet" type="text/css" href="/styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <meta charset="utf-8" />
+  <meta property="og:title" content="John's site" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://johnk.dev" />
+  <meta property="og:description" content="A site for my projects, articles, and other bits" />
+
+  <script src="/prefetch.js" defer></script>
+  <script src="/kb.js"></script>
+  <script type="module" defer>
+    import init, { json_format, insurance_value } from "/assets/wasm/tools.js";
+
+    init().then(() => {
+      const sel = document.getElementById("risk-select");
+      const crraWrap = document.getElementById("crra-wrap");
+      const crraInp = document.getElementById("crra-input");
+      const wealthInp = document.getElementById("wealth-input");
+      const eventsC = document.getElementById("events-container");
+      const addBtn = document.getElementById("add-event-btn");
+
+      sel.addEventListener("change", () => {
+        crraWrap.style.display = sel.value === "crra" ? "inline-block" : "none";
+        update();
+      });
+
+      crraInp.addEventListener("input", update);
+      wealthInp.addEventListener("input", update);
+
+      addBtn.addEventListener("click", e => {
+        console.log("click");
+        e.preventDefault();
+        const row = document.createElement("div");
+        row.className = "event-row";
+        row.innerHTML = `
+          <input type="number" step="any" min="0" max="1" placeholder="p" class="ev-p"/>
+          <input type="number" step="any" min="0" placeholder="cost" class="ev-c"/>
+          <input type="number" step="any" min="0" placeholder="deduct (opt)" class="ev-d"/>
+          <button class="remove-ev">✕</button>
+        `;
+        row.querySelectorAll("input").forEach(i => i.addEventListener("input", update));
+        row.querySelector(".remove-ev").addEventListener("click", _=>{
+          row.remove(); update();
+        });
+        eventsC.insertBefore(row, addBtn);
+      });
+
+      function update() {
+        const wealth = wealthInp.value;
+        let util = sel.value;
+
+        if (util === "crra") {
+          util = `crra,${crraInp.value}`;
+        }
+
+        let events_valid = true;
+        const evs = Array.from(eventsC.querySelectorAll(".event-row")).map(r => {
+          const p = r.querySelector(".ev-p").value;
+          const c = r.querySelector(".ev-c").value;
+          const d = r.querySelector(".ev-d").value;
+
+          if (p == "" || c == "") {
+            events_valid = false;
+          }
+
+          return d ? `${p},${c},${d}` : `${p},${c}`;
+        });
+
+        if (wealth.trim() === "" || evs.length === 0 || !events_valid) {
+          document.getElementById("result").textContent = "{Ensure wealth and all prob/cost fields are filled}";
+          return;
+        }
+
+        // now you’ve got:
+        //   wealth  = string
+        //   util    = "linear" | "log" | "crra,2.5" etc
+        //   events  = [ "0.1,100", "0.2,50,10", … ]
+        console.log({ wealth, util, events: evs });
+
+        // plug into your wasm calls if you like:
+        // let formatted = json_format(/*…*/);
+        // compute and show recommendation
+        const fee = insurance_value(util, wealth, evs);
+        const feeNum = parseFloat(fee).toFixed(2);
+        document.getElementById("result").textContent = `You should pay £${feeNum}`;
+      }
+
+      update();
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <div class="button">
+      <a href="/cv.pdf" target="_blank">
+        <i class="fas fa-file"></i> See my CV
+      </a>
+    </div>
+    <h1>John's Blog</h1>
+    <div></div> <!-- empty div needed for 3-col header grid -->
+  </header>
+
+  <main>
+    <article>
+      <div class="section-box">
+        <div id="risk-ui">
+          <div id="result"></div>
+          <label>
+            Risk fn:
+            <select id="risk-select">
+              <option value="linear">Linear</option>
+              <option value="log">Log</option>
+              <option selected="selected" value="crra">CRRA</option>
+            </select>
+          </label>
+          <label id="crra-wrap">
+            γ:
+            <input id="crra-input" type="number" step="any" min="0" value="2" />
+          </label>
+          <label>
+            Wealth:
+            <input id="wealth-input" type="number" step="any" min="0" />
+          </label>
+
+          <div id="events-container">
+            <button id="add-event-btn" class="button">+ Event</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="button">
+      <a href="https://twitter.com/johnkdev" target="_blank">
+        <i class="fab fa-twitter"></i> johnkdev
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://github.com/john-h-k" target="_blank">
+        <i class="fab fa-github"></i> john-h-k
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
+        <i class="fab fa-linkedin"></i> John Kelly
+      </a>
+    </div>
+    <div class="button">
+      <a href="mailto:johnharrykelly@gmail.com" target="_blank">
+        <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
+      </a>
+    </div>
+  </footer>
+</body>
+</html>
+

@@ -325,6 +325,15 @@ blockquote p {
   display: inline;  /* To keep quote symbol and text together */
 }
 
+#events-container {
+  margin-top: 1em;
+}
+
+#result {
+  margin-bottom: 0.5em;
+  font-weight:bold;
+}
+
 .loading {
   grid-area: about / about / rspacer / rspacer;
   display: flex;
