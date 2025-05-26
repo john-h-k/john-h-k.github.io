@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>John's Blog</title>
+  <link rel="stylesheet" type="text/css" href="/styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <meta charset="utf-8" />
+  <meta property="og:title" content="John's site" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://johnk.dev" />
+  <meta property="og:description" content="A site for my projects, articles, and other bits" />
+
+  <style>
+    /* minimal local styles for the calculator */
+    .bayes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .bayes-grid label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+    }
+
+    .bayes-grid input {
+      padding: 0.4rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .computed {
+      background-color: #dff4d8;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .button-row button {
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #444;
+      color: #fff;
+    }
+
+    .button-row button:hover {
+      opacity: 0.85;
+    }
+  </style>
+
+  <script src="/prefetch.js" defer></script>
+  <script src="/kb.js"></script>
+  <script type="module" defer>
+    /**
+     * Simple Bayes calculator. Enter any 3 of:
+     *  P(A|B)  as "pab"
+     *  P(B|A)  as "pba"
+     *  P(A)    as "pa"
+     *  P(B)    as "pb"
+     * The script infers the 4th, shows it to two decimal places, locks the field, and
+     * syncs the current values to the URL query‑string so the state can be shared.
+     */
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.querySelector('.section-box');
+      if (!container) return;
+
+      // Build UI ✨
+      container.innerHTML = `
+        <h2>Bayes Calculator</h2>
+        <p>Enter <em>exactly</em> three probabilities (0–1)</p>
+        <div class="bayes-grid">
+          <label>P(A|B) <input id="pAB" type="number" step="any" min="0" max="1" placeholder="?" /></label>
+          <label>P(B|A) <input id="pBA" type="number" step="any" min="0" max="1" placeholder="?" /></label>
+          <label>P(A)   <input id="pA"  type="number" step="any" min="0" max="1" placeholder="?" /></label>
+          <label>P(B)   <input id="pB"  type="number" step="any" min="0" max="1" placeholder="?" /></label>
+        </div>
+        <div class="button-row">
+          <button id="calcBtn" type="button">Calculate</button>
+          <button id="clearBtn" type="button">Clear</button>
+        </div>
+        <p id="status" aria-live="polite"></p>
+      `;
+
+      const ids = ['pAB', 'pBA', 'pA', 'pB'];
+
+      // Safely get value or NaN
+      const numVal = id => parseFloat(document.getElementById(id).value);
+
+      // Highlight computed field, lock it
+      const flagComputed = id => {
+        const el = document.getElementById(id);
+        el.classList.add('computed');
+        el.readOnly = true;
+      };
+
+      // Remove computed flag when user edits
+      ids.forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+          const el = document.getElementById(id);
+          el.classList.remove('computed');
+          el.readOnly = false;
+        });
+      });
+
+      // Sync values → URL (so ?pab=0.3&pa=0.1&... works)
+      const syncURL = () => {
+        const params = new URLSearchParams();
+        ids.forEach(id => {
+          if (!document.getElementById(id).classList.contains("computed")) {
+            const v = numVal(id);
+            if (!Number.isNaN(v)) params.set(id.toLowerCase(), v);
+          }
+        });
+        history.replaceState(null, '', `${window.location.pathname}?${params}`);
+      };
+
+      // Core compute fn
+      const calc = () => {
+        const values = {};
+        let missing = null;
+        let filled = 0;
+
+        ids.forEach(id => {
+          const v = numVal(id);
+          if (Number.isFinite(v)) {
+            values[id] = v;
+            filled += 1;
+          } else {
+            missing = id;
+          }
+        });
+
+        const status = document.getElementById('status');
+        status.textContent = '';
+
+        if (filled !== 3) {
+          status.textContent = 'Need exactly three numbers.';
+          return;
+        }
+
+        let res = NaN;
+        let missingText = "<err>";
+        try {
+          switch (missing) {
+            case 'pAB':
+              missingText = "P(A|B)";
+              res = values.pBA * values.pA / values.pB;
+              break;
+            case 'pBA':
+              missingText = "P(B|A)";
+              res = values.pAB * values.pB / values.pA;
+              break;
+            case 'pA':
+              missingText = "P(A)";
+              res = values.pAB * values.pB / values.pBA;
+              break;
+            case 'pB':
+              missingText = "P(B)";
+              res = values.pBA * values.pA / values.pAB;
+              break;
+          }
+          console.log(res)
+        } catch (_) {
+          status.textContent = 'Math error 🤷‍♂️';
+          return;
+        }
+
+        if (!Number.isFinite(res)) {
+          status.textContent = 'Math error 🤷‍♂️';
+          return;
+        }
+
+        // Clamp into [0,1] & format
+        res = Math.max(0, Math.min(1, res));
+        const el = document.getElementById(missing);
+        el.value = res.toFixed(2);
+        flagComputed(missing);
+        status.textContent = `Inferred ${missingText} = ${res.toFixed(2)}`;
+
+        syncURL();
+      };
+
+      // Clear handler
+      const clear = () => {
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          el.value = '';
+          el.readOnly = false;
+          el.classList.remove('computed');
+        });
+        document.getElementById('status').textContent = '';
+        history.replaceState(null, '', window.location.pathname);
+      };
+
+      // Query‑string prefill
+      const urlParams = new URLSearchParams(window.location.search);
+      ids.forEach(id => {
+        if (urlParams.has(id.toLowerCase())) {
+          const n = parseFloat(urlParams.get(id.toLowerCase()));
+          if (Number.isFinite(n)) document.getElementById(id).value = n;
+        }
+      });
+
+      // If exactly 3 params supplied, auto‑compute
+      if (ids.filter(id => urlParams.has(id.toLowerCase())).length === 3) calc();
+
+      document.getElementById('calcBtn').addEventListener('click', calc);
+      document.getElementById('clearBtn').addEventListener('click', clear);
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <div class="button">
+      <a href="/cv.pdf" target="_blank">
+        <i class="fas fa-file"></i> See my CV
+      </a>
+    </div>
+    <h1>John's Blog</h1>
+    <div></div> <!-- empty div needed for 3-col header grid -->
+  </header>
+
+  <main>
+    <article>
+      <div class="section-box">
+        <!-- Calculator UI injected by JS -->
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="button">
+      <a href="https://twitter.com/johnkdev" target="_blank">
+        <i class="fab fa-twitter"></i> johnkdev
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://github.com/john-h-k" target="_blank">
+        <i class="fab fa-github"></i> john-h-k
+      </a>
+    </div>
+    <div class="button">
+      <a href="https://linkedin.com/in/johnharrykelly" target="_blank">
+        <i class="fab fa-linkedin"></i> John Kelly
+      </a>
+    </div>
+    <div class="button">
+      <a href="mailto:johnharrykelly@gmail.com" target="_blank">
+        <i class="fas fa-envelope"></i> johnharrykelly@gmail.com
+      </a>
+    </div>
+  </footer>
+</body>
+</html>
