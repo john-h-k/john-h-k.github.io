@@ -83,10 +83,10 @@
         <h2>Bayes Calculator</h2>
         <p>Enter <em>exactly</em> three probabilities (0–1)</p>
         <div class="bayes-grid">
-          <label>P(A|B) <input id="pAB" type="number" step="any" min="0" max="1" placeholder="?" /></label>
-          <label>P(B|A) <input id="pBA" type="number" step="any" min="0" max="1" placeholder="?" /></label>
-          <label>P(A)   <input id="pA"  type="number" step="any" min="0" max="1" placeholder="?" /></label>
-          <label>P(B)   <input id="pB"  type="number" step="any" min="0" max="1" placeholder="?" /></label>
+          <label>P(A|B) - Posterior <input id="pAB" type="number" step="any" min="0" max="1" placeholder="?" /></label>
+          <label>P(B|A) - Likelihood <input id="pBA" type="number" step="any" min="0" max="1" placeholder="?" /></label>
+          <label>P(A) - Prior <input id="pA"  type="number" step="any" min="0" max="1" placeholder="?" /></label>
+          <label>P(B) - Marginal <input id="pB"  type="number" step="any" min="0" max="1" placeholder="?" /></label>
         </div>
         <div class="button-row">
           <button id="calcBtn" type="button">Calculate</button>

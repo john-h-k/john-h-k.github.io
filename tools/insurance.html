@@ -113,26 +113,31 @@
     <article>
       <div class="section-box">
         <div id="risk-ui">
-          <div id="result"></div>
-          <label>
-            Risk fn:
-            <select id="risk-select">
-              <option value="linear">Linear</option>
-              <option value="log">Log</option>
-              <option selected="selected" value="crra">CRRA</option>
-            </select>
-          </label>
-          <label id="crra-wrap">
-            γ:
-            <input id="crra-input" type="number" step="any" min="0" value="2" />
-          </label>
-          <label>
-            Wealth:
-            <input id="wealth-input" type="number" step="any" min="0" />
-          </label>
+          <div class="inputs">
+            <label>
+              Risk fn:
+              <select id="risk-select">
+                <option value="linear">Linear</option>
+                <option value="log">Log</option>
+                <option selected="selected" value="crra">CRRA</option>
+              </select>
+            </label>
+            <label id="crra-wrap">
+              γ:
+              <input id="crra-input" type="number" step="any" min="0" value="2" />
+            </label>
+            <label>
+              Wealth:
+              <input id="wealth-input" type="number" step="any" min="0" />
+            </label>
 
-          <div id="events-container">
-            <button id="add-event-btn" class="button">+ Event</button>
+            <div id="events-container">
+              <button id="add-event-btn" class="button">+ Event</button>
+            </div>
+          </div>
+
+          <div class="results">
+            <div id="result"></div>
           </div>
         </div>
       </div>

@@ -50,6 +50,21 @@ main {
   margin-top: 1em;
 }
 
+#risk-ui {
+  display: flex;
+  flex-direction: row;
+}
+
+#risk-ui .inputs {
+  flex: 1;
+  padding: 1em;
+}
+
+#risk-ui .results {
+  flex: 1;
+  padding: 1em;
+}
+
 #result {
   margin-bottom: 0.5em;
   font-weight: bold;
@@ -150,6 +165,8 @@ header > :first-child {
 header > :last-child {
   white-space: nowrap;
   text-align: right;
+
+  justify-self: end;
 }
 
 header .back-home {
