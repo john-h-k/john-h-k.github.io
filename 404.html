@@ -20,6 +20,9 @@
     if (path == "/command_buffer.html") {
       // HACK: redir this path from my linkedin lol
       window.location.pathname = "/articles/command-buffer.html";
+    } else if (path == "/money" || path == "/money.md") {
+      // HACK: redir this path from my linkedin lol
+      window.location.href = "https://gist.github.com/john-h-k/7f6dd757daf037bbc6ffe61b7f59658e";
     } else if (path.startsWith("/articles/generated/")) {
       // HACK: redir this path for wikipedia
       window.location.pathname = "/articles/" + path.slice("/articles/generated/".length);
