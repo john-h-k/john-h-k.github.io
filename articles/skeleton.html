@@ -37,8 +37,10 @@
         src = tryRmDelim(src, "$$");
         src = tryRmDelim(src, "$");
 
+        let isBlock = getComputedStyle(el).display === 'block';
+
         try {
-          katex.render(src, el, { throwOnError: false, strict: false });
+          katex.render(src, el, { displayMode: isBlock, throwOnError: false, strict: false });
         } catch(e) {
           console.warn('KaTeX failed on:', src, e);
         }
