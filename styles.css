@@ -336,7 +336,7 @@ div code, p code, span code, li code, ul code, h1 code, h2 code, h3 code, h4 cod
   border-radius: 3px;
 }
 
-blockquote {
+blockquote, .markdown-alert {
   border-left: 4px solid #007bff;  /* Blue border on the left */
   background-color: #f8f9fa;  /* Light gray background */
   margin: 20px 0;  /* Vertical spacing */
@@ -344,7 +344,7 @@ blockquote {
   quotes: "\201C""\201D""\2018""\2019";  /* Add quote marks */
 }
 
-blockquote:before {
+blockquote:before, .markdown-alert:before {
   content: open-quote;  /* Opening quote */
   font-size: 4em;
   line-height: 0.1em;
@@ -352,7 +352,7 @@ blockquote:before {
   vertical-align: -0.4em;
 }
 
-blockquote p {
+blockquote p, .markdown-alert p {
   display: inline;  /* To keep quote symbol and text together */
 }
 

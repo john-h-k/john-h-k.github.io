@@ -41,6 +41,9 @@
         src = tryRmDelim(src, "$$");
         src = tryRmDelim(src, "$");
 
+        // remove escaped
+        src = src.replace("&amp;", /&/g).replace("&lt;", /</g).replace("&gt;", />/g);
+
         let isBlock = getComputedStyle(el).display === 'block';
 
         console.log(`rendering '${src}' with options '${JSON.stringify({ displayMode: isBlock, throwOnError: false, strict: false })}'`);
