@@ -14,17 +14,17 @@
   <meta property="og:description" content="A site for my projects, articles, and other bits" />
   <title>Loading...</title>
   <script type="module" async>
-    const redirNotFound = () {
+    const redirNotFound = () => {
       console.log(`redirecting to actual 404 page...`);
       window.location.pathname = "/not_found.html";
     };
 
-    const redirUrl = (url) {
+    const redirUrl = (url) => {
       console.log(`redirecting to url '${url}'...`);
       window.location.href = url;
     };
 
-    const redirPath = (path) {
+    const redirPath = (path) => {
       console.log(`redirecting to path '${path}'...`);
       window.location.pathname = path;
     };
