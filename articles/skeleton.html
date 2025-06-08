@@ -21,7 +21,21 @@
     // Render latex elements
     document.addEventListener("DOMContentLoaded", function() {
       document.querySelectorAll('math-renderer').forEach(el=>{
-        const src = el.textContent.trim();
+        let src = el.textContent.trim();
+
+        const tryRmDelim = (s, delim) => {
+          if (s.startsWith(delim)) {
+            s = s.slice(delim.length);
+          }
+          if (s.endsWith(delim)) {
+            s = s.slice(0, s.length - delim.length);
+          }
+
+          return s;
+        };
+
+        src = tryRmDelim(src, "$$");
+        src = tryRmDelim(src, "$");
 
         try {
           katex.render(src, el, { throwOnError: false, strict: false });
