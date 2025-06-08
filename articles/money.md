@@ -1,3 +1,5 @@
+# Money
+
 > [!NOTE]
 > This was written with specific people in mind
 > But it hopefully contains some generally useful information
