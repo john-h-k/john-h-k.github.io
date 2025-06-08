@@ -21,8 +21,36 @@
     // Render latex elements
     document.addEventListener("DOMContentLoaded", function() {
       document.querySelectorAll('math-renderer').forEach(el=>{
+        if (el.classList.contains("js-display-math")) {
+          return;
+        }
 
-             });
+        let src = el.textContent.trim();
+
+        const tryRmDelim = (s, delim) => {
+          if (s.startsWith(delim)) {
+            s = s.slice(delim.length);
+          }
+          if (s.endsWith(delim)) {
+            s = s.slice(0, s.length - delim.length);
+          }
+
+          return s;
+        };
+
+        src = tryRmDelim(src, "$$");
+        src = tryRmDelim(src, "$");
+
+        let isBlock = getComputedStyle(el).display === 'block';
+
+        console.log(`rendering '${src}' with options '${JSON.stringify({ displayMode: isBlock, throwOnError: false, strict: false })}'`);
+
+        try {
+          katex.render(src, el, { displayMode: isBlock, throwOnError: false, strict: false });
+        } catch(e) {
+          console.warn('KaTeX failed on:', src, e);
+        }
+      });
     });
 
     // GitHub markdown API quirk - when you use `bash` syntax highlighting it generates `shell`.
