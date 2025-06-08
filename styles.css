@@ -362,10 +362,6 @@ blockquote:before, .markdown-alert:before {
   vertical-align: -0.125em;
 }
 
-blockquote p, .markdown-alert p {
-  display: inline;  /* To keep quote symbol and text together */
-}
-
 .loading {
   grid-area: about / about / rspacer / rspacer;
   display: flex;
