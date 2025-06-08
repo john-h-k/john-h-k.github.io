@@ -163,12 +163,15 @@ The key principle is salary sacrifice lowers your taxed income. Your employee pa
 
 Say you earn £115k a year, salary sacrifice £10k into your pension, £2.5k to a charity you care about, and £2.5k into an electric vehicle scheme that allows salary sacrifice. You effectively get a ~£8k pay raise, because if you didn't do this, the £15k above the £100k mark would be taxed at 60%.
 
+However, the electric vehicle salary sacrifice schemes all suck (they eat most of the advantage you get by pricing themselves higher). So really only worth looking at when they are a way of avoiding the tax trap _and_ you really don't want to increase pension contributions.
+
 Your salary/paychecks may be listed as or show a salary of £100k, but you are getting more money overall.
 
 The list of things you can salary sacrifice into changes, but a rough gist is:
 * Pensions (I will eat my hat if this changes)
-* Charitable donations
 * Electric vehicle schemes / big purchases the government wants to incentivise
+
+There is a related scheme, [Payroll Giving](https://www.gov.uk/payroll-giving), but you still pay national insurance on it, unlike salary sacrifice, and your employer must explicitly run the scheme.
 
 Once you reach the ~£120k mark, the amount you sacrifice becomes too large to make sense.
 
