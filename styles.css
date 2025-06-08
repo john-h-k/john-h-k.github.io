@@ -352,6 +352,16 @@ blockquote:before, .markdown-alert:before {
   vertical-align: -0.4em;
 }
 
+.markdown-alert-title {
+  display: block;
+}
+
+.markdown-alert-title svg {
+  margin-right: 0.5em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+
 blockquote p, .markdown-alert p {
   display: inline;  /* To keep quote symbol and text together */
 }
