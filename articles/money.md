@@ -98,12 +98,11 @@ $u(m) = ln(m)$
 ```math
 \begin{aligned}
 u(m) = \begin{cases}
-\frac{m^{1-\gamma} - 1}{1-\gamma} & \gamma \ge 0,\ \gamma \neq 1 \\
+\frac{m^{1-\gamma} - 1}{1 - \gamma} & \gamma \ge 0,\ \gamma \neq 1 \\
 \ln(m) & \gamma = 1
 \end{cases}
 \end{aligned}
 ```
-
 
 * Parameterised by $η$ or $γ$ (same thing), which represents risk tolerance (higher = more risk averse)
     - We use $γ$
