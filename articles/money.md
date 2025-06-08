@@ -123,10 +123,10 @@ The basic income tax bands:
 
 | Name               | Range                                   | Tax  |
 | ------------------ | ----------------------------------------| ---- |
-| Personal Allowance | $[\textsterling 0, \textsterling 12{,}571)$         | 0%   |
-| Basic Rate         | $[\textsterling 12{,}571, \textsterling 50{,}271)$  | 20%  |
-| Higher Rate        | $[\textsterling 50{,}271, \textsterling 125{,}141)$ | 40%  |
-| Additional Rate    | $[\textsterling 125{,}141, \infty)$           | 45%  |
+| Personal Allowance | $[\mathsterling 0, \mathsterling 12{,}571)$         | 0%   |
+| Basic Rate         | $[\mathsterling 12{,}571, \mathsterling 50{,}271)$  | 20%  |
+| Higher Rate        | $[\mathsterling 50{,}271, \mathsterling 125{,}141)$ | 40%  |
+| Additional Rate    | $[\mathsterling 125{,}141, \infty)$           | 45%  |
 
 
 Tax is progressive. Any sensible tax system has two rules:
@@ -141,7 +141,7 @@ For $1$, there are scenarios where earning more money **if you have a child** me
 This is not worth worrying about now, but it is very very useful to be aware of for the future. Here is take-home tax against income for a few situations.
 ![Image](https://preview.redd.it/seeing-the-tax-trap-v2-v0-rf5pfd1nztjd1.png?width=1080&crop=smart&auto=webp&s=3c52ea703904b98e609d20c0da1822c68adf5d42)
 
-$2$ is true for all incomes except within the $[\textsterling 100{,}000, \textsterling 125{,}140]$.
+$2$ is true for all incomes except within the $[\mathsterling 100{,}000, \mathsterling 125{,}140]$.
 At £100k, the personal allowance tapers off - for every £2 above £100k you earn, your personal allowance tapers off by £1. This leads to an effective tax of 60% in this range.
 
 > [!TIP]
