@@ -45,7 +45,7 @@ Many simplifications present.
 * Return profile = the mean and std dev of returns historically
 
 * Sharpe Ratio
-  * $\tfrac{\text{mean-of-returns} - \text{risk-free-rate}}{\text{std-dev-of-returns}}$
+  * $\frac{\text{mean-of-returns} - \text{risk-free-rate}}{\text{std-dev-of-returns}}$
    - This is the only good way of measuring how good an investment is for Reasons. Anything that mentions other approaches, particularly "Sortino Ratio" should be burnt
 
 #### Risk/utility function = function mapping money to "utility"
