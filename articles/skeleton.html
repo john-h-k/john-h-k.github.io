@@ -39,6 +39,8 @@
 
         let isBlock = getComputedStyle(el).display === 'block';
 
+        console.log(`rendering '${src}' with options '${{ displayMode: isBlock, throwOnError: false, strict: false }}'`);
+
         try {
           katex.render(src, el, { displayMode: isBlock, throwOnError: false, strict: false });
         } catch(e) {
