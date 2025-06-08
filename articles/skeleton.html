@@ -42,7 +42,7 @@
         src = tryRmDelim(src, "$");
 
         // remove escaped
-        src = src.replace("&amp;", /&/g).replace("&lt;", /</g).replace("&gt;", />/g);
+        src = src.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">");
 
         let isBlock = getComputedStyle(el).display === 'block';
 
