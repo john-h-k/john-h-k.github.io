@@ -283,7 +283,6 @@ footer {
 
 .button {
   background-color: #f1f1f1;
-  padding: 0.9375em;
   border: 1px solid #ccc;
   border-radius: 4px;
   width: fit-content;
@@ -295,6 +294,7 @@ footer {
   font-size: 1.2em;
   color: black;
   display: flex;
+  padding: 0.9375rem;
   align-items: center;
 }
 
