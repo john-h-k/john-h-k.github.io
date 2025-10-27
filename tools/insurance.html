@@ -55,43 +55,54 @@
       });
 
       function update() {
-        const wealth = wealthInp.value;
-        let util = sel.value;
+        console.log("updating...");
 
-        if (util === "crra") {
-          util = `crra,${crraInp.value}`;
-        }
+        try {
+          const wealth = wealthInp.value;
+          let util = sel.value;
 
-        let events_valid = true;
-        const evs = Array.from(eventsC.querySelectorAll(".event-row")).map(r => {
-          const p = r.querySelector(".ev-p").value;
-          const c = r.querySelector(".ev-c").value;
-          const d = r.querySelector(".ev-d").value;
-
-          if (p == "" || c == "") {
-            events_valid = false;
+          if (util === "crra") {
+            util = `crra,${crraInp.value}`;
           }
 
-          return d ? `${p},${c},${d}` : `${p},${c}`;
-        });
+          let events_valid = true;
+          const evs = Array.from(eventsC.querySelectorAll(".event-row")).map(r => {
+            const p = r.querySelector(".ev-p").value;
+            const c = r.querySelector(".ev-c").value;
+            const d = r.querySelector(".ev-d").value;
 
-        if (wealth.trim() === "" || evs.length === 0 || !events_valid) {
-          document.getElementById("result").textContent = "{Ensure wealth and all prob/cost fields are filled}";
-          return;
+            if (p == "" || c == "") {
+              events_valid = false;
+            }
+
+            return d ? `${p},${c},${d}` : `${p},${c}`;
+          });
+
+          if (wealth.trim() === "" || evs.length === 0 || !events_valid) {
+            document.getElementById("result").textContent = "{Ensure wealth and all prob/cost fields are filled}";
+            return;
+          }
+
+          // now you’ve got:
+          //   wealth  = string
+          //   util    = "linear" | "log" | "crra,2.5" etc
+          //   events  = [ "0.1,100", "0.2,50,10", … ]
+          console.log({ wealth, util, events: evs });
+
+          // plug into your wasm calls if you like:
+          // let formatted = json_format(/*…*/);
+          // compute and show recommendation
+          const fee = insurance_value(util, wealth, evs);
+          const feeNum = parseFloat(fee).toFixed(2);
+
+
+          console.log({ fee, wealth, util, events: evs });
+
+          document.getElementById("result").textContent = `You should pay £${feeNum}`;
+        } catch (e) {
+          console.error(e);
+          document.getElementById("result").textContent = `<Error: check console>`;
         }
-
-        // now you’ve got:
-        //   wealth  = string
-        //   util    = "linear" | "log" | "crra,2.5" etc
-        //   events  = [ "0.1,100", "0.2,50,10", … ]
-        console.log({ wealth, util, events: evs });
-
-        // plug into your wasm calls if you like:
-        // let formatted = json_format(/*…*/);
-        // compute and show recommendation
-        const fee = insurance_value(util, wealth, evs);
-        const feeNum = parseFloat(fee).toFixed(2);
-        document.getElementById("result").textContent = `You should pay £${feeNum}`;
       }
 
       update();
